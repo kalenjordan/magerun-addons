@@ -1,0 +1,19 @@
+{
+    "name": "kalenjordan/magerun-addons",
+    "type": "library",
+    "description": "Addon commands for N98 MageRun",
+    "keywords": ["magerun"],
+    "homepage": "https://github.com/kalenjordan/magerun-addons",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kalen Jordan",
+            "email": "kalen@sparcksoft.com",
+            "homepage": "http://www.sparcksoft.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    }
+}
