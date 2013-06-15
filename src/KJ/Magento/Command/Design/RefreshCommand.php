@@ -54,8 +54,8 @@ class RefreshCommand extends \N98\Magento\Command\AbstractMagentoCommand
      * Will match either
      *
      * {{secure_base_url}}skin/
-     * http://local.cleanprogram.com/skin/
-     * http://local.cleanprogram.com/2013-06-14-11-58-UTC/skin/
+     * http://www.domain.com/skin/
+     * http://www.domain.com/2013-06-14-11-58-UTC/skin/
      */
     protected function addNewTimestamp($url, $directory)
     {
@@ -65,6 +65,7 @@ class RefreshCommand extends \N98\Magento\Command\AbstractMagentoCommand
             $timestamp = date('Y-m-d-g-i-T') . "/";
         }
 
+        // TODO: Need better support for generic domain names.
         $pattern = "(.*)(.com\/|url}}).{0,25}" . $directory ;
 
         if (preg_match("/" . $pattern . "/", $url)) {
