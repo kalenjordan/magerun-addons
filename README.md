@@ -35,3 +35,6 @@ It's intended to be used in conjunction with a web server rewrite rule that will
 to
 
     /skin/...
+
+Note: I should mention that the URL parsing to generate the URLs needs work.  It supports either a 
+URL ending in .com or a URL relative to the base (.e.g. {{base_url}}skin).  
