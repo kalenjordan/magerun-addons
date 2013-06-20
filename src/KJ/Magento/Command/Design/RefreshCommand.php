@@ -36,8 +36,6 @@ class RefreshCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $configs = array(
             'web/unsecure/base_skin_url'    => 'skin',
             'web/secure/base_skin_url'      => 'skin',
-            'web/unsecure/base_media_url'   => 'media',
-            'web/secure/base_media_url'     => 'media',
             'web/unsecure/base_js_url'    => 'js',
             'web/secure/base_js_url'      => 'js',
         );
