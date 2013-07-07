@@ -1,0 +1,6 @@
+autoloaders:
+  KJ: %module%/src
+
+commands:
+  customCommands:
+    - KJ\Magento\Command\Design\RefreshCommand
