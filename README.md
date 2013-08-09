@@ -38,3 +38,13 @@ to
 
 Note: I should mention that the URL parsing to generate the URLs needs work.  It supports either a 
 URL ending in .com or a URL relative to the base (.e.g. {{base_url}}skin).  
+
+### Create dummy order ###
+
+This is very experimental and has some defaults in it such as the default billing address for a customer
+that aren't very international-friendly.
+
+    $ mr order:create:dummy
+    
+It picks a random customer, random product, and a random order creation date up to two years ago from 
+the present time, and creates an order.
