@@ -13,6 +13,9 @@ class Dummy extends \N98\Magento\Command\AbstractMagentoCommand
     /** @var InputInterface $input */
     protected $_input;
 
+    /** @var OutputInterface $input */
+    protected $_output;
+
     protected $_customer;
     protected $_product;
     protected $_quote;
@@ -21,6 +24,7 @@ class Dummy extends \N98\Magento\Command\AbstractMagentoCommand
     {
         $this
             ->setName('order:create:dummy')
+            ->addArgument('count', InputArgument::REQUIRED, 'Count')
             ->setDescription('(Experimental) Create a dummy order using a random customer, product, and date.')
         ;
     }
@@ -33,20 +37,35 @@ class Dummy extends \N98\Magento\Command\AbstractMagentoCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->_input = $input;
+        $this->_output = $output;
         $this->detectMagento($output, true);
         $this->initMagento();
 
+        for ($i = 1; $i <= $input->getArgument('count'); $i++) {
+            echo "$i. ";
+            $this->_createOrder();
+            unset($this->_customer);
+            unset($this->_product);
+            unset($this->_quote);
+        }
+
+    }
+
+    protected function _createOrder()
+    {
         $customer = $this->getCustomer();
-        $output->writeln(sprintf("<info>Using customer: %s (%s)</info>", $customer->getName(), $customer->getEmail()));
+        $this->_output->writeln(sprintf("<info>Using customer: %s (%s)</info>", $customer->getName(), $customer->getEmail()));
 
         $product = $this->getProduct();
-        $output->writeln(sprintf("<info>Using product: %s (%s)</info>", $product->getName(), $product->getId()));
+        $this->_output->writeln(sprintf("<info>Using product: %s (%s)</info>", $product->getName(), $product->getId()));
 
         $createdAt = $this->getCreatedAt();
-        $output->writeln(sprintf("<info>Using created_at date: %s</info>", $createdAt));
+        $this->_output->writeln(sprintf("<info>Using created_at date: %s</info>", $createdAt));
 
-        $order = $this->createOrder();
-        $output->writeln(sprintf("<info>Created order: %s</info>", $order->getId()));
+        $order = $this->createOrderFromQuote();
+        if ($order) {
+            $this->_output->writeln(sprintf("<info>Created order: %s</info>", $order->getIncrementId()));
+        }
     }
 
     /**
@@ -86,8 +105,15 @@ class Dummy extends \N98\Magento\Command\AbstractMagentoCommand
 
         /** @var \Mage_Catalog_Model_Product $firstResult */
         $firstResult = $products->getFirstItem();
-        $this->_product = \Mage::getModel('catalog/product')->load($firstResult->getId());
+        $product = \Mage::getModel('catalog/product')->load($firstResult->getId());
 
+        $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
+        if (!empty($parents)) {
+            $this->_output->writeln("<error>Product ({$product->getId()}) is a child of configurable, can't use this</error>");
+            return $this->getProduct();
+        }
+
+        $this->_product = $product;
         return $this->_product;
     }
 
@@ -100,7 +126,24 @@ class Dummy extends \N98\Magento\Command\AbstractMagentoCommand
         return $createdAtString;
     }
 
-    protected function createOrder()
+    /**
+     * @return Mage_Sales_Model_Order
+     */
+    protected function createOrderFromQuote()
+    {
+        try {
+            $order = $this->_createOrderFromQuote();
+        } catch (\Exception $e) {
+            if (strpos($e->getMessage(), 'Please specify the product') !== false) {
+                $this->_output->writeln("<error>Product has required options, skipping</error>");
+                return null;
+            }
+        }
+
+        return $order;
+    }
+
+    protected function _createOrderFromQuote()
     {
         $quote = $this->getQuote();
         $this->addItemToQuote();
@@ -127,10 +170,13 @@ class Dummy extends \N98\Magento\Command\AbstractMagentoCommand
             return $this->_quote;
         }
 
+        /** @var \Mage_Sales_Model_Quote $quote */
         $quote = \Mage::getModel('sales/quote')->assignCustomer($this->getCustomer());
-        $storeId = $this->getCustomer()->getStore()->getId();
+        $storeId = 1;
         $store = $quote->getStore()->load($storeId);
         $quote->setStore($store);
+        $quote->setBaseCurrencyCode('USD');
+        $quote->setQuoteCurrencyCode('USD');
 
         $this->_quote = $quote;
         return $this->_quote;
@@ -144,7 +190,7 @@ class Dummy extends \N98\Magento\Command\AbstractMagentoCommand
         /** @var Mage_Sales_Model_Quote_Item $quoteItem */
         $quoteItem = $quote->addProduct($product);
         if (is_string($quoteItem)) {
-            throw new \Exception(sprintf("Error: $quoteItem (product ID: %s, Item ID: %s)", $product->getId(), $item->getId()));
+            throw new \Exception(sprintf("Error: $quoteItem"));
         }
 
         $quoteItem->setQuote($quote);
