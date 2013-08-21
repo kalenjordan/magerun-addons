@@ -13,6 +13,9 @@ class AnonymizeCommand extends \N98\Magento\Command\AbstractMagentoCommand
     /** @var InputInterface $input */
     protected $_input;
 
+    /** @var OutputInterface $output  */
+    protected $_output;
+
     protected function configure()
     {
         $this
@@ -29,6 +32,8 @@ class AnonymizeCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->_input = $input;
+        $this->_output = $output;
+
         $this->detectMagento($output, true);
         $this->initMagento();
 
@@ -44,10 +49,46 @@ class AnonymizeCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $resource = \Mage::getSingleton('core/resource');
         $connection = $resource->getConnection('core_write');
 
+        $tableName = $resource->getTableName($table);
+        $records = $connection->fetchAll("
+            SELECT $emailColumn
+            FROM $tableName
+            WHERE $emailColumn NOT LIKE 'test+%'
+        ");
+
+        foreach ($records as $record) {
+            $this->_anonymizeCustomer($table, $emailColumn, $record);
+        }
+
+        return $this;
+    }
+
+    protected function _anonymizeCustomer($table, $emailColumn, $record)
+    {
+        $resource = \Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_write');
+
+        $actualEmail = $record['email'];
+        $randomizedEmail = 'test+' . rand(1, 9999999999) . '@example.com';
+
+        foreach ($this->_getTables() as $table => $emailColumn) {
+            $this->_anonymizeCustomerForTable($table, $emailColumn, $actualEmail, $randomizedEmail);
+        }
+    }
+
+    protected function _anonymizeCustomerForTable($table, $emailColumn, $actualEmail, $randomizedEmail)
+    {
+        $resource = \Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_write');
+        $tableName = $resource->getTableName($table);
+
         $query = "
-            UPDATE " . $resource->getTableName($table) . "
-            SET " . $emailColumn . " = CONCAT('test+',RAND(),'@example.com')
+            UPDATE $tableName
+            SET $emailColumn = '$randomizedEmail'
+            WHERE $emailColumn = '$actualEmail'
         ";
+
+        $this->_output->writeln("<info>Changing $actualEmail to $randomizedEmail in $table");
         $connection->query($query);
 
         return $this;
