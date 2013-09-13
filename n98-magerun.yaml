@@ -4,3 +4,4 @@ autoloaders:
 commands:
   customCommands:
     - KJ\Magento\Command\Design\RefreshCommand
+    - KJ\Magento\Command\Order\Create\Dummy
