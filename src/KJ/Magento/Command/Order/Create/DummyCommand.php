@@ -43,10 +43,14 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         for ($i = 1; $i <= $input->getArgument('count'); $i++) {
             echo "$i. ";
-            $this->_createOrder();
-            unset($this->_customer);
-            unset($this->_product);
-            unset($this->_quote);
+            try {
+                $this->_createOrder();
+                unset($this->_customer);
+                unset($this->_product);
+                unset($this->_quote);
+            } catch (\Exception $e) {
+                $this->_output->writeln("<error>Problem creating order: " . $e->getMessage() . "</error>");
+            }
         }
 
     }
@@ -109,8 +113,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
         if (!empty($parents)) {
-            $this->_output->writeln("<error>Product ({$product->getId()}) is a child of configurable, can't use this</error>");
-            return $this->getProduct();
+            throw new \KJ\Magento\Exception\Product\Configurable("Product ({$product->getId()}) is a child of configurable, can't use this.");
         }
 
         $this->_product = $product;
@@ -126,27 +129,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         return $createdAtString;
     }
 
-    /**
-     * @return Mage_Sales_Model_Order
-     */
     protected function createOrderFromQuote()
-    {
-        try {
-            $order = $this->_createOrderFromQuote();
-        } catch (\Exception $e) {
-            if (strpos($e->getMessage(), 'Please specify the product') !== false) {
-                $this->_output->writeln("<error>Product has required options, skipping</error>");
-                return null;
-            } else {
-                \Mage::logException($e);
-                throw $e;
-            }
-        }
-
-        return $order;
-    }
-
-    protected function _createOrderFromQuote()
     {
         $quote = $this->getQuote();
         $this->addItemToQuote();
