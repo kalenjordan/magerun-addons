@@ -1,7 +1,12 @@
 MageRun Addons
 ==============
 
-Some additional comands for the excellent N98-MageRun Magento command-line tool.  
+Some additional comands for the excellent N98-MageRun Magento command-line tool.
+
+The purpose of this project is just to have an easy way to deploy new, custom
+commands that I need to use in various places.  It's easier for me to do this
+than to maintain a fork of n98-magerun, but I'd be happy to merge any of these
+commands into the main n98-magerun project if desired.
 
 Installation
 ------------
@@ -11,11 +16,17 @@ Installation
     
     to your `composer.json` file.
 
-2. Add the custom commands to your ~/.n98-magerun.yaml
+2. Update composer from within your n98-magerun root
+
+       php composer.phar update
+
+3. Add the custom commands to your ~/.n98-magerun.yaml
 
         commands:
            customCommands:
                - \KJ\Magento\Command\Design\RefreshCommand
+               - \KJ\Magento\Command\Order\Create\DummyCommand
+               - \KJ\Magento\Command\Customer\AnonymizeCommand
 
 
 Commands
@@ -48,3 +59,11 @@ that aren't very international-friendly.
     
 It picks a random customer, random product, and a random order creation date up to two years ago from 
 the present time, and creates an order.
+
+### Anonymize customer data ###
+
+Anonymize customer data across a bunch of tables: order, order address, newsletter, quotes,
+newsletter subscriber.
+
+    $ mr customer:anon
+

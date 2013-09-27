@@ -65,6 +65,10 @@ class AnonymizeCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
     protected function _anonymizeCustomer($table, $emailColumn, $record)
     {
+        if (!isset($record['email']) || !$record['email']) {
+            return $this;
+        }
+
         $resource = \Mage::getSingleton('core/resource');
         $connection = $resource->getConnection('core_write');
 

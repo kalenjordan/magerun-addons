@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Dummy extends \N98\Magento\Command\AbstractMagentoCommand
+class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 {
     /** @var InputInterface $input */
     protected $_input;
