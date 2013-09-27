@@ -45,14 +45,23 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             echo "$i. ";
             try {
                 $this->_createOrder();
-                unset($this->_customer);
-                unset($this->_product);
-                unset($this->_quote);
             } catch (\Exception $e) {
                 $this->_output->writeln("<error>Problem creating order: " . $e->getMessage() . "</error>");
             }
+            $this->_resetEverything();
         }
 
+    }
+
+    /**
+     * Reset the customer, product, quote objects that have been saved
+     * so that new ones can be generated for the next iteration.
+     */
+    protected function _resetEverything()
+    {
+        unset($this->_customer);
+        unset($this->_product);
+        unset($this->_quote);
     }
 
     protected function _createOrder()
