@@ -5,6 +5,7 @@ namespace KJ\Magento\Util\Comparison;
 class Item extends \KJ\Magento\Util\AbstractUtil
 {
     protected $_rawLine;
+    protected $_numberOfDifferences = 0;
 
     /** @var  \KJ\Magento\Util\Comparison */
     protected $_comparison;
@@ -50,5 +51,45 @@ class Item extends \KJ\Magento\Util\AbstractUtil
     public function setComparison($comparison)
     {
         $this->_comparison = $comparison;
+    }
+
+    public function matchPattern($pattern)
+    {
+        $haystack = $this->getFileName();
+
+        if (strpos($pattern, '*') === false) {
+            return ($haystack == $pattern);
+        }
+
+        $pattern = str_replace('*', '.*', $pattern);
+        $pattern = str_replace('/', '\/', $pattern);
+        $result = preg_match('/' . $pattern . '/', $haystack);
+
+        return $result;
+    }
+
+    public function getDiff()
+    {
+        $fromFileFullPath = $this->_comparison->getMagentoVersion()->getBaseDir() . '/' . $this->getFileName();
+        $toFileFullPath = $this->_comparison->getMagentoInstanceRootDirectory() . '/' . $this->getFileName();
+
+        $context = $this->_comparison->getLinesOfContext();
+        $lines = $this->_executeShellCommand(sprintf('diff -U%s -w %s %s', $context, $fromFileFullPath, $toFileFullPath));
+
+        foreach ($lines as & $line) {
+            $comparisonItemLine = new \KJ\Magento\Util\Comparison\Item\Line($line);
+
+            if ($comparisonItemLine->isAdditionLine()) {
+                $line = "<info>" . $line . "</info>";
+                $this->_numberOfDifferences++;
+            }
+
+            if ($comparisonItemLine->isRemovalLine()) {
+                $line = "<comment>" . $line . "</comment>";
+                $this->_numberOfDifferences++;
+            }
+        }
+
+        return $lines;
     }
 }

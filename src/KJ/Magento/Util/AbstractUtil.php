@@ -6,7 +6,7 @@ class AbstractUtil
 {
     protected function _outputVerbose($message)
     {
-        if ($this->_input->getOption('verbose')) {
+        if (isset($this->_input) && $this->_input->getOption('verbose')) {
             $this->_output->writeln('Verbose: ' . $message);
         }
 
@@ -20,7 +20,7 @@ class AbstractUtil
         exec($command, $commandOutput, $returnValue);
 
         if ($returnValue > 1) {
-            $this->_output->writeln('<error>' . implode(PHP_EOL, $commandOutput) . '</error>');
+            throw new \Exception(implode(PHP_EOL, $commandOutput));
         }
 
         return $commandOutput;

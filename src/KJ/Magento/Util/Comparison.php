@@ -15,6 +15,10 @@ class Comparison extends AbstractUtil
 
     protected $_magentoInstanceRootDirectory;
 
+    protected $_changedFiles = array();
+
+    protected $_linesOfContext;
+
     public function __construct($input, $output)
     {
         $this->_input = $input;
@@ -32,10 +36,20 @@ class Comparison extends AbstractUtil
         return $this->_magentoVersion;
     }
 
+    public function getMagentoInstanceRootDirectory()
+    {
+        return $this->_magentoInstanceRootDirectory;
+    }
+
     public function setMagentoInstanceRootDirectory($directory)
     {
         $this->_magentoInstanceRootDirectory = $directory;
         return $this;
+    }
+
+    public function getChangedFiles()
+    {
+        return $this->_changedFiles;
     }
 
     public function compare()
@@ -44,21 +58,42 @@ class Comparison extends AbstractUtil
         $toDirectory = $this->_magentoInstanceRootDirectory;
 
         $this->_diffOutput = $this->_executeShellCommand(sprintf('diff -w -x "var" -qrbB %s %s', $fromDirectory, $toDirectory));
+
+        foreach ($this->_diffOutput as $line) {
+            $comparisonItem = new \KJ\Magento\Util\Comparison\Item($line);
+            $comparisonItem->setComparison($this);
+            if ($comparisonItem->isDifference()) {
+                $this->_changedFiles[] = $comparisonItem;
+            }
+        }
+
+        return $this;
     }
 
     public function getSummary()
     {
         $filenames = array();
-        foreach ($this->_diffOutput as $line) {
-            $comparisonItem = new \KJ\Magento\Util\Comparison\Item($line);
-            $comparisonItem->setComparison($this);
-            if ($comparisonItem->isDifference()) {
-                $filenames[] = array(
-                    'file' => $comparisonItem->getFileName()
-                );
-            }
+
+        foreach ($this->_changedFiles as $comparisonItem) {
+            $filenames[] = array(
+                'file' => $comparisonItem->getFileName()
+            );
         }
 
         return $filenames;
+    }
+
+    public function setLinesOfContext($lines)
+    {
+        $this->_linesOfContext = $lines;
+    }
+
+    public function getLinesOfContext()
+    {
+        if (isset($this->_linesOfContext)) {
+            return $this->_linesOfContext;
+        }
+
+        return 3;
     }
 }
