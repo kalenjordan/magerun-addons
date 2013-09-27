@@ -137,6 +137,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             if (strpos($e->getMessage(), 'Please specify the product') !== false) {
                 $this->_output->writeln("<error>Product has required options, skipping</error>");
                 return null;
+            } else {
+                \Mage::logException($e);
+                throw $e;
             }
         }
 
