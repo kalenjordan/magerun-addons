@@ -27,6 +27,7 @@ Installation
                - \KJ\Magento\Command\Design\RefreshCommand
                - \KJ\Magento\Command\Order\Create\DummyCommand
                - \KJ\Magento\Command\Customer\AnonymizeCommand
+               - \KJ\Magento\Command\Diff\FileCommand
 
 
 Commands
@@ -66,4 +67,10 @@ Anonymize customer data across a bunch of tables: order, order address, newslett
 newsletter subscriber.
 
     $ mr customer:anon
+
+### Core file diff ###
+
+Diff core files to see if they've been modified
+
+    $ mr diff:files
 
