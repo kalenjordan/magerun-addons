@@ -18,7 +18,7 @@ Installation
 
 2. Update composer from within your n98-magerun root
 
-       php composer.phar update
+        php composer.phar update
 
 3. Add the custom commands to your ~/.n98-magerun.yaml
 
@@ -73,4 +73,8 @@ newsletter subscriber.
 Diff core files to see if they've been modified
 
     $ mr diff:files
+
+This just does a simple diff against a fresh copy of the Magento version's
+code base.  Need to add support for it to understand overrides such as a
+file in app/code/local or lib/.
 
