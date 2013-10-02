@@ -88,8 +88,8 @@ class AnonymizeCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         $query = "
             UPDATE $tableName
-            SET $emailColumn = '$randomizedEmail'
-            WHERE $emailColumn = '$actualEmail'
+            SET $emailColumn = '" . mysql_escape_string($randomizedEmail) . "'
+            WHERE $emailColumn = '" . mysql_escape_string($actualEmail) . "'
         ";
 
         $this->_output->writeln("<info>Changing $actualEmail to $randomizedEmail in $table");
