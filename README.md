@@ -20,15 +20,6 @@ Installation
 
         php composer.phar update
 
-3. Add the custom commands to your ~/.n98-magerun.yaml
-
-        commands:
-           customCommands:
-               - \KJ\Magento\Command\Design\RefreshCommand
-               - \KJ\Magento\Command\Order\Create\DummyCommand
-               - \KJ\Magento\Command\Customer\AnonymizeCommand
-               - \KJ\Magento\Command\Diff\FileCommand
-
 
 Commands
 --------
