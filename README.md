@@ -78,3 +78,16 @@ This just does a simple diff against a fresh copy of the Magento version's
 code base.  Need to add support for it to understand overrides such as a
 file in app/code/local or lib/.
 
+### Grab mailchimp unsubscribes ###
+
+Grab all of the mailchimp unsubscribes to your primary list
+
+    $ mr mailchimp:unsubscribe:list
+
+If you're using Ebizmarts_MageMonkey to manage your Mailchimp integration,
+this will allow you to grab a list of all of the unsubscribed emails to
+your primary list.
+
+The main purpose for doing this is if you need to import these unsubscribes
+somewhere.  The routine will dispatch an event `mailchimp_list_unsubscribe_discovered`
+which you can observe in order to handle them.

@@ -7,3 +7,4 @@ commands:
        - KJ\Magento\Command\Order\Create\DummyCommand
        - KJ\Magento\Command\Customer\AnonymizeCommand
        - KJ\Magento\Command\Diff\FileCommand
+       - KJ\Magento\Command\Mailchimp\UnsubscribeListCommand
