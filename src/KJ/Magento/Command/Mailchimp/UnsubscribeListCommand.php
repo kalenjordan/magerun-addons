@@ -14,6 +14,7 @@ class UnsubscribeListCommand extends \KJ\Magento\Command\AbstractCommand
         $this
             ->setName('mailchimp:unsubscribe:list')
             ->addOption('page-size', null, InputOption::VALUE_OPTIONAL, "The number of results pulled at once over Mailchimp API", 1000)
+            ->addOption('limit', null, InputOption::VALUE_OPTIONAL, "Maximum number of unsubscribes to grab")
             ->setDescription('Grab a list of unsubscribed email addresses from the primary mailchimp account configured in MageMonkey extension.');
     }
 
@@ -39,7 +40,11 @@ class UnsubscribeListCommand extends \KJ\Magento\Command\AbstractCommand
             foreach ($members as $member) {
                 \Mage::dispatchEvent('mailchimp_list_unsubscribe_discovered', array('email' => $member['email']));
                 $output->writeln("<info>$i. " . $member['email'] . "</info>");
+
                 $i++;
+                if ($this->_input->getOption('limit') && $i > $this->_input->getOption('limit')) {
+                    break 2;
+                }
             }
         }
     }
