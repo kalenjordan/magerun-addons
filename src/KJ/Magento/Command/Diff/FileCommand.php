@@ -63,8 +63,6 @@ class FileCommand extends AbstractCommand
      */
     protected function _outputComparisonDetails($comparison)
     {
-        $details = '';
-
         /** @var $comparisonItem \KJ\Magento\Util\Comparison\Item */
         foreach ($comparison->getChangedFiles() as $comparisonItem) {
             if ($comparisonItem->matchPattern($this->_input->getArgument('pattern'))) {
@@ -72,7 +70,5 @@ class FileCommand extends AbstractCommand
                 $this->_output->write($comparisonItem->getDiff(), true);
             }
         }
-
-        $this->_output->writeln($details);
     }
 }

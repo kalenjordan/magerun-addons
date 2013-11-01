@@ -69,6 +69,14 @@ This just does a simple diff against a fresh copy of the Magento version's
 code base.  Need to add support for it to understand overrides such as a
 file in app/code/local or lib/.
 
+### Theme diff ###
+
+Diff theme files to see what has been modified.
+
+    $ mr diff:theme
+
+**(Not quite ready yet)**
+
 ### Grab mailchimp unsubscribes ###
 
 Grab all of the mailchimp unsubscribes to your primary list
