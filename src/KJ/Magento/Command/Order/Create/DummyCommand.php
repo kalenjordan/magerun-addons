@@ -25,6 +25,8 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $this
             ->setName('order:create:dummy')
             ->addArgument('count', InputArgument::REQUIRED, 'Count')
+            ->addOption('customer', null, InputOption::VALUE_OPTIONAL, "A customer ID to use for the order")
+            ->addOption('product', null, InputOption::VALUE_OPTIONAL, "A product SKU to use for the order")
             ->setDescription('(Experimental) Create a dummy order using a random customer, product, and date.')
         ;
     }
@@ -90,6 +92,18 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             return $this->_customer;
         }
 
+        if ($this->_input->getOption('customer')) {
+            $customer = \Mage::getModel('customer/customer')->load($this->_input->getOption('customer'));
+        } else {
+            $customer = $this->_loadRandomCustomer();
+        }
+
+        $this->_customer = \Mage::getModel('customer/customer')->load($customer->getId());
+        return $this->_customer;
+    }
+
+    protected function _loadRandomCustomer()
+    {
         /** @var \Mage_Customer_Model_Resource_Customer_Collection $customers */
         $customers = \Mage::getModel('customer/customer')->getCollection()
             ->setPageSize(1);
@@ -97,9 +111,8 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         /** @var \Mage_Customer_Model_Customer $customer */
         $customer = $customers->getFirstItem();
-        $this->_customer = \Mage::getModel('customer/customer')->load($customer->getId());
 
-        return $this->_customer;
+        return $customer;
     }
 
     /**
@@ -111,6 +124,27 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             return $this->_product;
         }
 
+        if ($this->_input->getOption('product')) {
+            $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $this->_input->getOption('product'));
+            if (!$product) {
+                throw new \Exception("Couldn't find product by SKU: " . $this->_input->getOption('product'));
+            }
+            $product = \Mage::getModel('catalog/product')->load($product->getId());
+        } else {
+            $product = $this->_loadRandomProduct();
+        }
+
+        $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
+        if (!empty($parents)) {
+            throw new \KJ\Magento\Exception\Product\Configurable("Product ({$product->getId()}) is a child of configurable, can't use this.");
+        }
+
+        $this->_product = $product;
+        return $this->_product;
+    }
+
+    protected function _loadRandomProduct()
+    {
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $products */
         $products = \Mage::getModel('catalog/product')->getCollection()
             ->setPageSize(1);
@@ -120,13 +154,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $firstResult = $products->getFirstItem();
         $product = \Mage::getModel('catalog/product')->load($firstResult->getId());
 
-        $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
-        if (!empty($parents)) {
-            throw new \KJ\Magento\Exception\Product\Configurable("Product ({$product->getId()}) is a child of configurable, can't use this.");
-        }
-
-        $this->_product = $product;
-        return $this->_product;
+        return $product;
     }
 
     protected function getCreatedAt()
