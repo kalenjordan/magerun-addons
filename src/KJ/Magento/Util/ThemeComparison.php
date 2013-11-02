@@ -2,98 +2,50 @@
 
 namespace KJ\Magento\Util;
 
-class ThemeComparison extends AbstractUtil
+class ThemeComparison extends AbstractComparison
 {
-    /** @var InputInterface $input */
-    protected $_input;
+    protected $_currentTheme;
 
-    /** @var OutputInterface $output  */
-    protected $_output;
+    protected $_themeToCompare;
 
-    /** @var  \KJ\Magento\Util\MagentoVersion */
-    protected $_magentoVersion;
+    protected $_changedLayoutFiles = array();
 
-    protected $_magentoInstanceRootDirectory;
+    protected $_changedTemplateFiles = array();
 
-    protected $_changedFiles = array();
-
-    protected $_linesOfContext;
-
-    public function __construct($input, $output)
+    public function setCurrentTheme($theme)
     {
-        $this->_input = $input;
-        $this->_output = $output;
-    }
-
-    public function setMagentoVersion($version)
-    {
-        $this->_magentoVersion = $version;
+        $this->_currentTheme = $theme;
         return $this;
     }
 
-    public function getMagentoVersion()
+    public function setThemeToCompare($theme)
     {
-        return $this->_magentoVersion;
-    }
-
-    public function getMagentoInstanceRootDirectory()
-    {
-        return $this->_magentoInstanceRootDirectory;
-    }
-
-    public function setMagentoInstanceRootDirectory($directory)
-    {
-        $this->_magentoInstanceRootDirectory = $directory;
+        $this->_themeToCompare = $theme;
         return $this;
-    }
-
-    public function getChangedFiles()
-    {
-        return $this->_changedFiles;
     }
 
     public function compare()
     {
-        $fromDirectory = $this->_magentoVersion->getBaseDir();
-        $toDirectory = $this->_magentoInstanceRootDirectory;
-
-        $this->_diffOutput = $this->_executeShellCommand(sprintf('diff -w -x "var" -qrbB %s %s', $fromDirectory, $toDirectory));
-
-        foreach ($this->_diffOutput as $line) {
-            $comparisonItem = new \KJ\Magento\Util\Comparison\Item($line);
-            $comparisonItem->setComparison($this);
-            if ($comparisonItem->isDifference()) {
-                $this->_changedFiles[] = $comparisonItem;
-            }
-        }
+        $this->_compareLayoutFiles();
 
         return $this;
     }
 
-    public function getSummary()
+    protected function _compareLayoutFiles()
     {
-        $filenames = array();
+        $themeLayoutDirectory = $this->_magentoInstanceRootDirectory . '/app/design/frontend/' . $this->_currentTheme . '/layout';
+        $finder = new \Symfony\Component\Finder\Finder();
 
-        foreach ($this->_changedFiles as $comparisonItem) {
-            $filenames[] = array(
-                'file' => $comparisonItem->getFileName()
-            );
+        $iterator = $finder->files()
+            ->name('*.xml')
+            ->in($themeLayoutDirectory);
+
+        foreach ($iterator as $file) {
+            $comparisonItem = new \KJ\Magento\Util\ThemeComparison\LayoutItem($file);
+            $comparisonItem->setComparison($this);
+            $this->_changedLayoutFiles[] = $comparisonItem;
         }
 
-        return $filenames;
-    }
-
-    public function setLinesOfContext($lines)
-    {
-        $this->_linesOfContext = $lines;
-    }
-
-    public function getLinesOfContext()
-    {
-        if (isset($this->_linesOfContext)) {
-            return $this->_linesOfContext;
-        }
-
-        return 3;
+        return $layoutFiles;
     }
 }

@@ -29,7 +29,7 @@ class ThemeCommand extends AbstractCommand
 
         $version = $this->getCurrentVersion();
         $this->_info(sprintf('Magento Version is %s', $version));
-        $this->_info(sprintf('Current theme is %s', $this->_getCurrentTheme()));
+        $this->_info(sprintf('Comparing current theme %s to %s', $this->_getCurrentTheme(), $this->_getThemeToCompareTo()));
 
         $comparison = new \KJ\Magento\Util\ThemeComparison($input, $output);
 
@@ -37,7 +37,6 @@ class ThemeCommand extends AbstractCommand
             $comparison->setLinesOfContext($this->_input->getOption('lines'));
         }
 
-        $layoutFiles = $this->_getLayoutFiles();
         $design = \Mage::getSingleton('core/design_package');
         $filename = $design->getTemplateFilename('page/html/head.phtml', array(
             '_area'    => 'frontend',
@@ -45,11 +44,12 @@ class ThemeCommand extends AbstractCommand
             '_theme'   => 'default',
         ));
 
-        //$comparison->setMagentoVersion($version)
-        //    ->setMagentoInstanceRootDirectory($this->_magentoRootFolder)
-        //    ->compare();
+        $comparison->setMagentoInstanceRootDirectory($this->_magentoRootFolder)
+            ->setCurrentTheme($this->_getCurrentTheme())
+            ->setThemeToCompare($this->_getThemeToCompareTo())
+            ->compare();
 
-        $this->_outputComparisonSummary($layoutFiles);
+        $this->_outputComparisonSummary($comparison);
     }
 
     protected function _getCurrentTheme()
@@ -57,33 +57,19 @@ class ThemeCommand extends AbstractCommand
         return 'clean/default';
     }
 
-    protected function _getLayoutFiles()
+    protected function _getThemeToCompareTo()
     {
-        $themeLayoutDirectory = $this->_magentoRootFolder . '/app/design/frontend/' . $this->_getCurrentTheme() . '/layout';
-        $finder = new \Symfony\Component\Finder\Finder();
-
-        $iterator = $finder
-            ->files()
-            ->name('*.xml')
-            ->in($themeLayoutDirectory);
-
-        foreach ($iterator as $file) {
-            $layoutFiles[] = array(
-                'file' => 'layout/' . $file->getRelativePathname()
-            );
-        }
-
-        return $layoutFiles;
+        return 'enterprise/default';
     }
 
     /**
-     * @param $comparison \KJ\Magento\Util\Comparison
+     * @param $comparison \KJ\Magento\Util\ThemeComparison
      */
-    protected function _outputComparisonSummary($layoutFiles)
+    protected function _outputComparisonSummary($comparison)
     {
         $this->getHelper('table')
             ->setHeaders(array('File'))
-            ->setRows($layoutFiles)
+            ->setRows($comparison->getSummary())
             ->render($this->_output);
     }
 }
