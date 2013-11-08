@@ -90,3 +90,17 @@ your primary list.
 The main purpose for doing this is if you need to import these unsubscribes
 somewhere.  The routine will dispatch an event `mailchimp_list_unsubscribe_discovered`
 which you can observe in order to handle them.
+
+
+### Uninstall a module ###
+
+Uninstall a module by deleting all the module's files and removing database tables.
+
+    $ mr dev:module:remove Aitoc_*
+
+NOTE: This is not fully baked yet, at the moment it just deletes the main module config
+file and the code directory.  Pretty trivial, but I'm going to add in database tables,
+layout files, template files, etc.
+
+Oh and wildcards aren't supported in the module name yet either, but I just had to do
+that as an example :)

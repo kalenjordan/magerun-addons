@@ -4,6 +4,7 @@ autoloaders:
 commands:
    customCommands:
        - KJ\Magento\Command\Design\RefreshCommand
+       - KJ\Magento\Command\Developer\Module\RemoveCommand
        - KJ\Magento\Command\Order\Create\DummyCommand
        - KJ\Magento\Command\Customer\AnonymizeCommand
        - KJ\Magento\Command\Diff\FileCommand
