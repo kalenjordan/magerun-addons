@@ -30,7 +30,7 @@ class FileCommand extends AbstractCommand
         $version = $this->getCurrentVersion();
         $this->_info(sprintf('Magento Version is %s', $version));
 
-        $comparison = new \KJ\Magento\Util\Comparison($input, $output);
+        $comparison = new \KJ\Magento\Util\FileComparison($input, $output);
 
         if ($this->_input->getOption('lines')) {
             $comparison->setLinesOfContext($this->_input->getOption('lines'));
@@ -71,6 +71,4 @@ class FileCommand extends AbstractCommand
             }
         }
     }
-
-
 }

@@ -6,7 +6,7 @@ class ThemeComparison extends AbstractComparison
 {
     protected $_currentTheme;
 
-    protected $_themeToCompare;
+    protected $_themeToCompareAgainst;
 
     protected $_changedLayoutFiles = array();
 
@@ -25,10 +25,15 @@ class ThemeComparison extends AbstractComparison
         return $this;
     }
 
-    public function setThemeToCompare($theme)
+    public function setThemeToCompareAgainst($theme)
     {
-        $this->_themeToCompare = $theme;
+        $this->_themeToCompareAgainst = $theme;
         return $this;
+    }
+
+    public function getThemeToCompareAgainst()
+    {
+        return $this->_themeToCompareAgainst;
     }
 
     public function getMagentoInstanceRootDirectory()
@@ -62,7 +67,9 @@ class ThemeComparison extends AbstractComparison
         foreach ($iterator as $file) {
             $comparisonItem = new \KJ\Magento\Util\ThemeComparison\LayoutItem($file);
             $comparisonItem->setComparison($this);
-            $this->_changedLayoutFiles[] = $comparisonItem;
+            if ($comparisonItem->fileToCompareAgainstExists()) {
+                $this->_changedLayoutFiles[] = $comparisonItem;
+            }
         }
 
         return $this;
@@ -80,8 +87,8 @@ class ThemeComparison extends AbstractComparison
 
         foreach ($iterator as $file) {
             $comparisonItem = new \KJ\Magento\Util\ThemeComparison\TemplateItem($file);
+            $comparisonItem->setComparison($this);
             if ($comparisonItem->fileToCompareAgainstExists()) {
-                $comparisonItem->setComparison($this);
                 $this->_changedTemplateFiles[] = $comparisonItem;
             }
         }

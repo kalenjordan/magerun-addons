@@ -20,6 +20,11 @@ class AbstractComparison extends AbstractUtil
         $this->_output = $output;
     }
 
+    public function getMagentoInstanceRootDirectory()
+    {
+        return $this->_magentoInstanceRootDirectory;
+    }
+
     public function setMagentoInstanceRootDirectory($directory)
     {
         $this->_magentoInstanceRootDirectory = $directory;
