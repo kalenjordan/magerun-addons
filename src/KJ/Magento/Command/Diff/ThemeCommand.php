@@ -49,7 +49,11 @@ class ThemeCommand extends AbstractCommand
             ->setThemeToCompare($this->_getThemeToCompareTo())
             ->compare();
 
-        $this->_outputComparisonSummary($comparison);
+        if ($input->getArgument('pattern')) {
+            $this->_outputComparisonDetails($comparison);
+        } else {
+            $this->_outputComparisonSummary($comparison);
+        }
     }
 
     protected function _getCurrentTheme()
@@ -71,5 +75,19 @@ class ThemeCommand extends AbstractCommand
             ->setHeaders(array('File'))
             ->setRows($comparison->getSummary())
             ->render($this->_output);
+    }
+
+    /**
+     * @param $comparison \KJ\Magento\Util\Comparison
+     */
+    protected function _outputComparisonDetails($comparison)
+    {
+        /** @var $comparisonItem \KJ\Magento\Util\Comparison\Item */
+        foreach ($comparison->getChangedFiles() as $comparisonItem) {
+            if ($comparisonItem->matchPattern($this->_input->getArgument('pattern'))) {
+                $this->writeSection($this->_output, $comparisonItem->getFileName());
+                $this->_output->write($comparisonItem->getDiff(), true);
+            }
+        }
     }
 }

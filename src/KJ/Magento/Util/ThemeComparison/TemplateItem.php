@@ -2,7 +2,7 @@
 
 namespace KJ\Magento\Util\ThemeComparison;
 
-class LayoutItem extends \KJ\Magento\Util\AbstractUtil
+class TemplateItem extends \KJ\Magento\Util\AbstractUtil
 {
     /**
      * @var \Symfony\Component\Finder\SplFileInfo
@@ -25,7 +25,7 @@ class LayoutItem extends \KJ\Magento\Util\AbstractUtil
 
     public function getFileName()
     {
-        return 'layout/' . $this->_file->getRelativePathname();
+        return 'template/' . $this->_file->getRelativePathname();
     }
 
     public function setComparison($comparison)
@@ -52,7 +52,7 @@ class LayoutItem extends \KJ\Magento\Util\AbstractUtil
     {
         // todokj The 'enterprise' needs to be determined dynamically
         $design = \Mage::getSingleton('core/design_package');
-        $filename = $design->getLayoutFilename($this->_file->getRelativePathname(), array(
+        $filename = $design->getTemplateFilename($this->_file->getRelativePathname(), array(
             '_area'    => 'frontend',
             '_package' => 'enterprise',
             '_theme'   => 'default',
@@ -70,13 +70,20 @@ class LayoutItem extends \KJ\Magento\Util\AbstractUtil
         return $path;
     }
 
+    public function fileToCompareAgainstExists()
+    {
+        $fromFileFullPath = $this->_getAbsoluteFilePathToCompareAgainst();
+        if (!file_exists($fromFileFullPath)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function getDiff()
     {
-        $fromFileFullPath = $this->_getAbsoluteFilePath();
-        $toFileFullPath = $this->_getAbsoluteFilePathToCompareAgainst();
-        if (!file_exists($toFileFullPath)) {
-            return array("<info>Doesn't exist in base theme</info>");
-        }
+        $fromFileFullPath = $this->_getAbsoluteFilePathToCompareAgainst();
+        $toFileFullPath = $this->_getAbsoluteFilePath();
 
         $context = $this->_comparison->getLinesOfContext();
         $lines = $this->_executeShellCommand(sprintf('diff -U%s -w %s %s', $context, $fromFileFullPath, $toFileFullPath));
