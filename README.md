@@ -73,9 +73,17 @@ file in app/code/local or lib/.
 
 Diff theme files to see what has been modified.
 
-    $ mr diff:theme
+    $ mr diff:theme customtheme/default default/default
+    
+See what customizations have been made in your custom theme against the
+base theme.
 
-**(Not quite ready yet)**
+Summary screenshot:
+![Image](https://raw.github.com/kalenjordan/magerun-addons/master/docs/img/diff-summary.png)
+
+Details screenshot:
+![Image](https://raw.github.com/kalenjordan/magerun-addons/master/docs/img/diff-details.png)
+
 
 ### Grab mailchimp unsubscribes ###
 
