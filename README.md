@@ -52,6 +52,18 @@ that aren't very international-friendly.
 It picks a random customer, random product, and a random order creation date up to two years ago from 
 the present time, and creates an order.
 
+### Assign order to new customer ###
+
+Assign an order to a new customer by ID.
+
+This is very experimental - doesn't modify all of the places that customer data exists on the order
+models, such as the shipping and billing address - just the customer name, email, ID on the order
+entity.
+
+    $ mr order:assign 10000000001 10
+    
+Assigns the order #10000000001 to customer ID 10.
+
 ### Anonymize customer data ###
 
 Anonymize customer data across a bunch of tables: order, order address, newsletter, quotes,
