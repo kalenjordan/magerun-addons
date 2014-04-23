@@ -66,7 +66,7 @@ class RefreshCommand extends \N98\Magento\Command\AbstractMagentoCommand
         }
 
         // TODO: Need better support for generic domain names.
-        $pattern = "(.*)(.com\/|\.net|url}}).{0,25}" . $directory ;
+        $pattern = "(.*)(.com\/|\.net\/|url}}).{0,25}" . $directory ;
 
         if (preg_match("/" . $pattern . "/", $url)) {
             preg_match_all("/" . $pattern . "/", $url, $matches);
