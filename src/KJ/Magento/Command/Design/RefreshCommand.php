@@ -34,10 +34,12 @@ class RefreshCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $this->initMagento();
 
         $configs = array(
-            'web/unsecure/base_skin_url'    => 'skin',
-            'web/secure/base_skin_url'      => 'skin',
-            'web/unsecure/base_js_url'    => 'js',
-            'web/secure/base_js_url'      => 'js',
+            'web/unsecure/base_skin_url'        => 'skin',
+            'web/secure/base_skin_url'          => 'skin',
+            'web/unsecure/base_js_url'          => 'js',
+            'web/secure/base_js_url'            => 'js',
+            'web/unsecure/base_media_url'       => 'media',
+            'web/secure/base_media_url'         => 'media',
         );
 
         foreach ($configs as $configPath => $type) {
@@ -64,7 +66,7 @@ class RefreshCommand extends \N98\Magento\Command\AbstractMagentoCommand
         }
 
         // TODO: Need better support for generic domain names.
-        $pattern = "(.*)(.com\/|url}}).{0,25}" . $directory ;
+        $pattern = "(.*)(.com\/|\.net|url}}).{0,25}" . $directory ;
 
         if (preg_match("/" . $pattern . "/", $url)) {
             preg_match_all("/" . $pattern . "/", $url, $matches);
