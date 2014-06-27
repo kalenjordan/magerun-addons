@@ -10,16 +10,23 @@ commands into the main n98-magerun project if desired.
 
 Installation
 ------------
-1. Add the repository to your `composer.json` file under the `require` node.
+There are a few options.  You can check out the different options in the [MageRun
+docs](http://magerun.net/introducting-the-new-n98-magerun-module-system/).
 
-        "kalenjordan/magerun-addons": "dev-master"
-    
-    to your `composer.json` file.
+Here's the easiest:
 
-2. Update composer from within your n98-magerun root
+1. Create ~/.n98-magerun/modules/ if it doesn't already exist.
 
-        php composer.phar update
+        mkdir -p ~/.n98-magerun/modules/
 
+2. Clone the magerun-addons repository in there
+
+        cd ~/.n98-magerun/modules/
+        git clone git@github.com:kalenjordan/magerun-addons.git
+
+3. It should be installed.  To see that it was installed, check to see if one of the new commands is in there, like `diff:files`.
+
+        mr diff:files
 
 Commands
 --------
@@ -29,7 +36,7 @@ Commands
 This command modifies the skin and js base URLs with a timestamp-specific URL, so that browsers will pull 
 down fresh CSS and JS.
 
-    $ mr  design:refresh
+    $ mr design:refresh
 
 It's intended to be used in conjunction with a web server rewrite rule that will rewrite, for example:
        
