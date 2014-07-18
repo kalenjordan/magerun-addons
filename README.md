@@ -131,3 +131,10 @@ layout files, template files, etc.
 
 Oh and wildcards aren't supported in the module name yet either, but I just had to do
 that as an example :)
+
+
+### Generate gift card codes ###
+
+The missing tool to generate EE gift card codes!
+
+    $ mr giftcard:generate-codes --prefix=SWEET-DISCOUNTS-
