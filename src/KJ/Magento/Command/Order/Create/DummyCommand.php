@@ -247,7 +247,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         if ($this->getCustomer()->getDefaultBillingAddress()) {
             return $this->getCustomer()->getDefaultBillingAddress();
         } else if ($this->getCustomer()->getDefaultShippingAddress()) {
-            $this->getCustomer()->getDefaultShippingAddress();
+            return $this->getCustomer()->getDefaultShippingAddress();
         } else {
             return $this->getDefaultAddress();
         }
