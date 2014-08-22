@@ -203,8 +203,6 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $storeId = $this->_input->getOption('store') ? $this->_input->getOption('store') : $this->_getDefaultStoreId();
         $store = $quote->getStore()->load($storeId);
         $quote->setStore($store);
-        $quote->setBaseCurrencyCode($store->getBaseCurrencyCode());
-        $quote->setQuoteCurrencyCode($store->getBaseCurrencyCode());
 
         $this->_quote = $quote;
         return $this->_quote;
