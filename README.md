@@ -54,10 +54,10 @@ URL ending in .com or a URL relative to the base (.e.g. {{base_url}}skin).
 This is very experimental and has some defaults in it such as the default billing address for a customer
 that aren't very international-friendly.
 
-    $ mr order:create:dummy
+    $ mr order:create:dummy [--customer="..."] [--product="..."] [--store="..."] count
     
-It picks a random customer, random product, and a random order creation date up to two years ago from 
-the present time, and creates an order.
+Unless specified it picks a random customer, random product, and a random order creation date up to two years ago from
+the present time, and creates a defined number of orders order for a selected store.
 
 ### Assign order to new customer ###
 

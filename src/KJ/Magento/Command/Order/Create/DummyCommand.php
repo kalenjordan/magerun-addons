@@ -20,6 +20,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected $_product;
     protected $_quote;
 
+    /* Lazy loading */
+    protected $_defaultStoreId;
+
     protected function configure()
     {
         $this
@@ -27,6 +30,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             ->addArgument('count', InputArgument::REQUIRED, 'Count')
             ->addOption('customer', null, InputOption::VALUE_OPTIONAL, "A customer ID to use for the order")
             ->addOption('product', null, InputOption::VALUE_OPTIONAL, "A product SKU to use for the order")
+            ->addOption('store', null, InputOption::VALUE_OPTIONAL, "A store ID to use for the order")
             ->setDescription('(Experimental) Create a dummy order using a random customer, product, and date.')
         ;
     }
@@ -195,7 +199,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         /** @var \Mage_Sales_Model_Quote $quote */
         $quote = \Mage::getModel('sales/quote')->assignCustomer($this->getCustomer());
-        $storeId = 1;
+        $storeId = $this->_input->getOption('store') ? $this->_input->getOption('store') : $this->_getDefaultStoreId();
         $store = $quote->getStore()->load($storeId);
         $quote->setStore($store);
         $quote->setBaseCurrencyCode('USD');
@@ -301,5 +305,17 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         return $this;
 
+    }
+
+    protected function _getDefaultStoreId()
+    {
+        if (empty($this->_defaultStoreId)) {
+            $this->_defaultStoreId = \Mage::app()
+                ->getWebsite(true)
+                ->getDefaultGroup()
+                ->getDefaultStoreId();
+        }
+
+        return $this->_defaultStoreId;
     }
 }
