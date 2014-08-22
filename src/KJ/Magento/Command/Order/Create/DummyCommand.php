@@ -178,7 +178,8 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $this->setupShippingAddress();
         $this->setupShippingMethod();
         $this->setupPaymentMethod();
-        $this->getQuote()->collectTotals();
+        $this->getQuote()->collectTotals()
+            ->save();
 
         $service = \Mage::getModel('sales/service_quote', $quote);
         $order = $service->submitOrder();
