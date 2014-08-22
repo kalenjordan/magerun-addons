@@ -59,6 +59,8 @@ that aren't very international-friendly.
 Unless specified it picks a random customer, random product, and a random order creation date up to two years ago from
 the present time, and creates a defined number of orders order for a selected store.
 
+The product can be specified either explicitly by providing a SKU or from a range of SKUs by using a wildcard (e.g. `--product="2456%"`).
+
 ### Assign order to new customer ###
 
 Assign an order to a new customer by ID.

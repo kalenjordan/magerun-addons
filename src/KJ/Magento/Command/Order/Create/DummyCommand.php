@@ -128,14 +128,16 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             return $this->_product;
         }
 
-        if ($this->_input->getOption('product')) {
-            $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $this->_input->getOption('product'));
+        $product_input = $this->_input->getOption('product');
+
+        if ($product_input && !preg_match('/%/', $product_input)) {
+            $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $product_input);
             if (!$product) {
-                throw new \Exception("Couldn't find product by SKU: " . $this->_input->getOption('product'));
+                throw new \Exception("Couldn't find product by SKU: " . $product_input);
             }
             $product = \Mage::getModel('catalog/product')->load($product->getId());
         } else {
-            $product = $this->_loadRandomProduct();
+            $product = $this->_loadRandomProduct($product_input);
         }
 
         $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
@@ -147,12 +149,21 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         return $this->_product;
     }
 
-    protected function _loadRandomProduct()
+    protected function _loadRandomProduct($product_input)
     {
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $products */
-        $products = \Mage::getModel('catalog/product')->getCollection()
-            ->setPageSize(1);
+        $products = \Mage::getModel('catalog/product')->getCollection();
+
+        $products->setPageSize(1);
         $products->getSelect()->order(new \Zend_Db_Expr('RAND()'));
+
+        if ($product_input) {
+            $products->getSelect()->where('sku LIKE ?', $product_input);
+        }
+
+        if (!$products->getSize()) {
+            throw new \Exception('No products are matching the criteria');
+        }
 
         /** @var \Mage_Catalog_Model_Product $firstResult */
         $firstResult = $products->getFirstItem();
