@@ -54,12 +54,14 @@ URL ending in .com or a URL relative to the base (.e.g. {{base_url}}skin).
 This is very experimental and has some defaults in it such as the default billing address for a customer
 that aren't very international-friendly.
 
-    $ mr order:create:dummy [--customer="..."] [--product="..."] [--store="..."] count
+    $ mr order:create:dummy [--customer="..."] [--product="..."] [--store="..."] [--shipping="..."] count
     
 Unless specified it picks a random customer, random product, and a random order creation date up to two years ago from
 the present time, and creates a defined number of orders order for a selected store.
 
 The product can be specified either explicitly by providing a SKU or from a range of SKUs by using a wildcard (e.g. `--product="2456%"`).
+
+Due to obvious reasons not all shipping methods are supported. Currently you can specify either `flatrate_flatrate` or `tablerate_bestway`. If no shipping method is specified `flatrate_flatrate` will be used by default.
 
 ### Assign order to new customer ###
 

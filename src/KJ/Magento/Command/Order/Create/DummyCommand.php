@@ -23,6 +23,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     /* Lazy loading */
     protected $_defaultStoreId;
 
+    /* Supported shipping methods */
+    protected $_availableSippingMethods = array('flatrate_flatrate', 'tablerate_bestway');
+
     protected function configure()
     {
         $this
@@ -31,6 +34,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             ->addOption('customer', null, InputOption::VALUE_OPTIONAL, "A customer ID to use for the order")
             ->addOption('product', null, InputOption::VALUE_OPTIONAL, "A product SKU to use for the order")
             ->addOption('store', null, InputOption::VALUE_OPTIONAL, "A store ID to use for the order")
+            ->addOption('shipping', null, InputOption::VALUE_OPTIONAL, "A shipping method code to use for the order")
             ->setDescription('(Experimental) Create a dummy order using a random customer, product, and date.')
         ;
     }
@@ -297,10 +301,15 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
     protected function setupShippingMethod()
     {
-        /** @var Mage_Sales_Model_Quote_Address $shippingAddress */
-        $shippingAddress = $this->getQuote()->getShippingAddress();
+        $shipping_method_code = $this->_input->getOption('shipping');
 
-        $shippingAddress->setShippingMethod('flatrate_flatrate')
+        if ($shipping_method_code && !in_array($shipping_method_code, $this->_availableSippingMethods)) {
+            throw new \Exception('Shipping method is not supported.');
+        } elseif (!$shipping_method_code) {
+            $shipping_method_code = $this->_availableSippingMethods[0];
+        }
+
+        $this->getQuote()->getShippingAddress()->setShippingMethod($shipping_method_code)
             ->setCollectShippingRates(true)
             ->collectShippingRates();
 
