@@ -163,10 +163,13 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         if ($product_input) {
             $products->getSelect()->where('sku LIKE ?', $product_input);
+            $errorMessage = sprintf('No products match the SKU filter: %s', $product_input);
+        } else {
+            $errorMessage = 'No products are matching the criteria';
         }
 
         if (!$products->getSize()) {
-            throw new \Exception('No products are matching the criteria');
+            throw new \Exception($errorMessage);
         }
 
         /** @var \Mage_Catalog_Model_Product $firstResult */
