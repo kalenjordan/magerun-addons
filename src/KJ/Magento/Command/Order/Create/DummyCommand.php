@@ -124,36 +124,36 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     }
 
     /**
+     * @throws \Exception
      * @return \Mage_Catalog_Model_Product
      */
     protected function getProduct()
     {
-        if (isset($this->_product)) {
-            return $this->_product;
-        }
+        if (empty($this->_product)) {
+            $productInput = $this->_input->getOption('product');
 
-        $product_input = $this->_input->getOption('product');
-
-        if ($product_input && !preg_match('/%/', $product_input)) {
-            $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $product_input);
-            if (!$product) {
-                throw new \Exception("Couldn't find product by SKU: " . $product_input);
+            if ($productInput && !preg_match('/%/', $productInput)) {
+                $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $productInput);
+                if (!$product) {
+                    throw new \Exception("Couldn't find product by SKU: " . $productInput);
+                }
+                $product = \Mage::getModel('catalog/product')->load($product->getId());
+            } else {
+                $product = $this->_loadRandomProduct($productInput);
             }
-            $product = \Mage::getModel('catalog/product')->load($product->getId());
-        } else {
-            $product = $this->_loadRandomProduct($product_input);
+
+            $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
+            if (!empty($parents)) {
+                throw new \Exception("Product ({$product->getId()}) is a child of configurable, can't use this.");
+            }
+
+            $this->_product = $product;
         }
 
-        $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
-        if (!empty($parents)) {
-            throw new \KJ\Magento\Exception\Product\Configurable("Product ({$product->getId()}) is a child of configurable, can't use this.");
-        }
-
-        $this->_product = $product;
         return $this->_product;
     }
 
-    protected function _loadRandomProduct($product_input)
+    protected function _loadRandomProduct($productInput)
     {
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $products */
         $products = \Mage::getModel('catalog/product')->getCollection();
@@ -161,9 +161,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $products->setPageSize(1);
         $products->getSelect()->order(new \Zend_Db_Expr('RAND()'));
 
-        if ($product_input) {
-            $products->getSelect()->where('sku LIKE ?', $product_input);
-            $errorMessage = sprintf('No products match the SKU filter: %s', $product_input);
+        if ($productInput) {
+            $products->getSelect()->where('sku LIKE ?', $productInput);
+            $errorMessage = sprintf('No products match the SKU filter: %s', $productInput);
         } else {
             $errorMessage = 'No products are matching the criteria';
         }
