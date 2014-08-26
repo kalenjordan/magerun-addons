@@ -218,8 +218,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         /** @var \Mage_Sales_Model_Quote $quote */
         $quote = \Mage::getModel('sales/quote')->assignCustomer($this->getCustomer());
-        $storeId = $this->_input->getOption('store') ? $this->_input->getOption('store') : $this->_getDefaultStoreId();
-        $store = $quote->getStore()->load($storeId);
+        $store = $quote->getStore()->load($this->_getStoreId());
         $quote->setStore($store);
 
         $this->_quote = $quote;
@@ -339,5 +338,10 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         }
 
         return $this->_defaultStoreId;
+    }
+
+    protected function _getStoreId()
+    {
+        return $this->_input->getOption('store') ? $this->_input->getOption('store') : $this->_getDefaultStoreId();
     }
 }
