@@ -158,22 +158,23 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         return $this->_product;
     }
 
-    protected function _loadRandomProduct($skuWildcard)
+    protected function _loadRandomProduct($skuPattern = null)
     {
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $products */
         $products = \Mage::getModel('catalog/product')->getCollection();
 
         $products->setPageSize(1);
         $products->getSelect()->order(new \Zend_Db_Expr('RAND()'));
-
-        if ($skuWildcard) {
-            $products->getSelect()->where('sku LIKE ?', $skuWildcard);
-            $errorMessage = sprintf('No products match the SKU filter: %s', $skuWildcard);
-        } else {
-            $errorMessage = 'No products are matching the criteria';
+        if ($skuPattern) {
+            $products->getSelect()->where('sku LIKE ?', $skuPattern);
         }
 
         if (!$products->getSize()) {
+            $errorMessage = 'No products are matching the criteria';
+            if ($skuPattern) {
+                $errorMessage .= " ($skuPattern)";
+            }
+
             throw new \Exception($errorMessage);
         }
 
@@ -349,13 +350,14 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function _getShippingMethodCode()
     {
         $shippingMethodCode = $this->_input->getOption('shipping');
-
-        if ($shippingMethodCode && !in_array($shippingMethodCode, $this->_availableSippingMethods)) {
-            throw new \Exception('Shipping method is not supported.');
-        } elseif (!$shippingMethodCode) {
+        if (! $shippingMethodCode) {
             return $this->_availableSippingMethods[0];
-        } else {
-            return $shippingMethodCode;
         }
+
+        if (!in_array($shippingMethodCode, $this->_availableSippingMethods)) {
+            throw new \Exception('Shipping method is not supported.');
+        }
+
+        return $shippingMethodCode;
     }
 }
