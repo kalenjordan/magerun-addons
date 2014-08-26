@@ -77,7 +77,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function _createOrder()
     {
         $customer = $this->getCustomer();
-        $this->_output->writeln(sprintf("<info>Using customer: %s (%s)</info>", $customer->getName(), $customer->getEmail()));
+        $this->_output->writeln(sprintf("<info>Using customer: %s (%s)</info>", $customer->getName(), $customer->getData('email')));
 
         $product = $this->getProduct();
         $this->_output->writeln(sprintf("<info>Using product: %s (%s)</info>", $product->getName(), $product->getId()));
@@ -113,8 +113,8 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function _loadRandomCustomer()
     {
         /** @var \Mage_Customer_Model_Resource_Customer_Collection $customers */
-        $customers = \Mage::getModel('customer/customer')->getCollection()
-            ->setPageSize(1);
+        $customers = \Mage::getModel('customer/customer')->getCollection();
+        $customers->setPageSize(1);
         $customers->getSelect()->order(new \Zend_Db_Expr('RAND()'));
 
         /** @var \Mage_Customer_Model_Customer $customer */
@@ -133,7 +133,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             $productInput = $this->_input->getOption('product');
 
             if ($productInput && !preg_match('/%/', $productInput)) {
-                $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $productInput);
+                /** @var \Mage_Catalog_Model_Product $product */
+                $product = \Mage::getModel('catalog/product');
+                $product->loadByAttribute('sku', $productInput);
                 if (!$product) {
                     throw new \Exception("Couldn't find product by SKU: " . $productInput);
                 }
@@ -142,7 +144,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
                 $product = $this->_loadRandomProduct($productInput);
             }
 
-            $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
+            /** @var \Mage_Catalog_Model_Product_Type_Configurable $productType */
+            $productType = \Mage::getModel('catalog/product_type_configurable');
+            $parents = $productType->getParentIdsByChild($product->getId());
             if (!empty($parents)) {
                 throw new \Exception("Product ({$product->getId()}) is a child of configurable, can't use this.");
             }
@@ -199,6 +203,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $this->getQuote()->collectTotals()
             ->save();
 
+        /** @var \Mage_Sales_Model_Service_Quote $service */
         $service = \Mage::getModel('sales/service_quote', $quote);
         $order = $service->submitOrder();
         $order->setCreatedAt($this->getCreatedAt());
@@ -217,7 +222,8 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         }
 
         /** @var \Mage_Sales_Model_Quote $quote */
-        $quote = \Mage::getModel('sales/quote')->assignCustomer($this->getCustomer());
+        $quote = \Mage::getModel('sales/quote');
+        $quote->assignCustomer($this->getCustomer());
         $store = $quote->getStore()->load($this->_getStoreId());
         $quote->setStore($store);
 
@@ -230,7 +236,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $product = $this->getProduct();
         $quote = $this->getQuote();
 
-        /** @var Mage_Sales_Model_Quote_Item $quoteItem */
+        /** @var \Mage_Sales_Model_Quote_Item $quoteItem */
         $quoteItem = $quote->addProduct($product);
         if (is_string($quoteItem)) {
             throw new \Exception(sprintf("Error: $quoteItem"));
@@ -276,8 +282,8 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function getDefaultAddress()
     {
         $data = array (
-            'firstname' => $this->getCustomer()->getFirstname(),
-            'lastname' => $this->getCustomer()->getLastname(),
+            'firstname' => $this->getCustomer()->getData('firstname'),
+            'lastname' => $this->getCustomer()->getData('lastname'),
             'street' => array (
                 '0' => '123 Abc Road',
             ),
