@@ -129,31 +129,32 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
      */
     protected function getProduct()
     {
-        if (empty($this->_product)) {
-            $productInput = $this->_input->getOption('product');
-
-            if ($productInput && !preg_match('/%/', $productInput)) {
-                /** @var \Mage_Catalog_Model_Product $product */
-                $product = \Mage::getModel('catalog/product');
-                $product->loadByAttribute('sku', $productInput);
-                if (!$product) {
-                    throw new \Exception("Couldn't find product by SKU: " . $productInput);
-                }
-                $product = \Mage::getModel('catalog/product')->load($product->getId());
-            } else {
-                $product = $this->_loadRandomProduct($productInput);
-            }
-
-            /** @var \Mage_Catalog_Model_Product_Type_Configurable $productType */
-            $productType = \Mage::getModel('catalog/product_type_configurable');
-            $parents = $productType->getParentIdsByChild($product->getId());
-            if (!empty($parents)) {
-                throw new \Exception("Product ({$product->getId()}) is a child of configurable, can't use this.");
-            }
-
-            $this->_product = $product;
+        if (isset($this->_product)) {
+            return $this->_product;
         }
 
+        $productInput = $this->_input->getOption('product');
+
+        if ($productInput && !preg_match('/%/', $productInput)) {
+            /** @var \Mage_Catalog_Model_Product $product */
+            $product = \Mage::getModel('catalog/product');
+            $product->loadByAttribute('sku', $productInput);
+            if (!$product) {
+                throw new \Exception("Couldn't find product by SKU: " . $productInput);
+            }
+            $product = \Mage::getModel('catalog/product')->load($product->getId());
+        } else {
+            $product = $this->_loadRandomProduct($productInput);
+        }
+
+        /** @var \Mage_Catalog_Model_Product_Type_Configurable $productType */
+        $productType = \Mage::getModel('catalog/product_type_configurable');
+        $parents = $productType->getParentIdsByChild($product->getId());
+        if (!empty($parents)) {
+            throw new \Exception("Product ({$product->getId()}) is a child of configurable, can't use this.");
+        }
+
+        $this->_product = $product;
         return $this->_product;
     }
 
@@ -309,9 +310,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
     protected function setupShippingMethod()
     {
-        $shipping_method_code = $this->_getShippingMethodCode();
+        $shippingMethodCode = $this->_getShippingMethodCode();
 
-        $this->getQuote()->getShippingAddress()->setShippingMethod($shipping_method_code)
+        $this->getQuote()->getShippingAddress()->setShippingMethod($shippingMethodCode)
             ->setCollectShippingRates(true)
             ->collectShippingRates();
 
@@ -347,14 +348,14 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
     protected function _getShippingMethodCode()
     {
-        $shipping_method_code = $this->_input->getOption('shipping');
+        $shippingMethodCode = $this->_input->getOption('shipping');
 
-        if ($shipping_method_code && !in_array($shipping_method_code, $this->_availableSippingMethods)) {
+        if ($shippingMethodCode && !in_array($shippingMethodCode, $this->_availableSippingMethods)) {
             throw new \Exception('Shipping method is not supported.');
-        } elseif (!$shipping_method_code) {
+        } elseif (!$shippingMethodCode) {
             return $this->_availableSippingMethods[0];
         } else {
-            return $shipping_method_code;
+            return $shippingMethodCode;
         }
     }
 }
