@@ -303,13 +303,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
     protected function setupShippingMethod()
     {
-        $shipping_method_code = $this->_input->getOption('shipping');
-
-        if ($shipping_method_code && !in_array($shipping_method_code, $this->_availableSippingMethods)) {
-            throw new \Exception('Shipping method is not supported.');
-        } elseif (!$shipping_method_code) {
-            $shipping_method_code = $this->_availableSippingMethods[0];
-        }
+        $shipping_method_code = $this->_getShippingMethodCode();
 
         $this->getQuote()->getShippingAddress()->setShippingMethod($shipping_method_code)
             ->setCollectShippingRates(true)
@@ -343,5 +337,18 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function _getStoreId()
     {
         return $this->_input->getOption('store') ? $this->_input->getOption('store') : $this->_getDefaultStoreId();
+    }
+
+    protected function _getShippingMethodCode()
+    {
+        $shipping_method_code = $this->_input->getOption('shipping');
+
+        if ($shipping_method_code && !in_array($shipping_method_code, $this->_availableSippingMethods)) {
+            throw new \Exception('Shipping method is not supported.');
+        } elseif (!$shipping_method_code) {
+            return $this->_availableSippingMethods[0];
+        } else {
+            return $shipping_method_code;
+        }
     }
 }
