@@ -20,6 +20,12 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected $_product;
     protected $_quote;
 
+    /* Lazy loading */
+    protected $_defaultStoreId;
+
+    /* Supported shipping methods */
+    protected $_availableSippingMethods = array('flatrate_flatrate', 'tablerate_bestway');
+
     protected function configure()
     {
         $this
@@ -27,6 +33,8 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             ->addArgument('count', InputArgument::REQUIRED, 'Count')
             ->addOption('customer', null, InputOption::VALUE_OPTIONAL, "A customer ID to use for the order")
             ->addOption('product', null, InputOption::VALUE_OPTIONAL, "A product SKU to use for the order")
+            ->addOption('store', null, InputOption::VALUE_OPTIONAL, "A store ID to use for the order")
+            ->addOption('shipping', null, InputOption::VALUE_OPTIONAL, "A shipping method code to use for the order")
             ->setDescription('(Experimental) Create a dummy order using a random customer, product, and date.')
         ;
     }
@@ -116,39 +124,53 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     }
 
     /**
+     * @throws \Exception
      * @return \Mage_Catalog_Model_Product
      */
     protected function getProduct()
     {
-        if (isset($this->_product)) {
-            return $this->_product;
-        }
+        if (empty($this->_product)) {
+            $productInput = $this->_input->getOption('product');
 
-        if ($this->_input->getOption('product')) {
-            $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $this->_input->getOption('product'));
-            if (!$product) {
-                throw new \Exception("Couldn't find product by SKU: " . $this->_input->getOption('product'));
+            if ($productInput && !preg_match('/%/', $productInput)) {
+                $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $productInput);
+                if (!$product) {
+                    throw new \Exception("Couldn't find product by SKU: " . $productInput);
+                }
+                $product = \Mage::getModel('catalog/product')->load($product->getId());
+            } else {
+                $product = $this->_loadRandomProduct($productInput);
             }
-            $product = \Mage::getModel('catalog/product')->load($product->getId());
-        } else {
-            $product = $this->_loadRandomProduct();
+
+            $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
+            if (!empty($parents)) {
+                throw new \Exception("Product ({$product->getId()}) is a child of configurable, can't use this.");
+            }
+
+            $this->_product = $product;
         }
 
-        $parents = \Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
-        if (!empty($parents)) {
-            throw new \KJ\Magento\Exception\Product\Configurable("Product ({$product->getId()}) is a child of configurable, can't use this.");
-        }
-
-        $this->_product = $product;
         return $this->_product;
     }
 
-    protected function _loadRandomProduct()
+    protected function _loadRandomProduct($skuWildcard)
     {
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $products */
-        $products = \Mage::getModel('catalog/product')->getCollection()
-            ->setPageSize(1);
+        $products = \Mage::getModel('catalog/product')->getCollection();
+
+        $products->setPageSize(1);
         $products->getSelect()->order(new \Zend_Db_Expr('RAND()'));
+
+        if ($skuWildcard) {
+            $products->getSelect()->where('sku LIKE ?', $skuWildcard);
+            $errorMessage = sprintf('No products match the SKU filter: %s', $skuWildcard);
+        } else {
+            $errorMessage = 'No products are matching the criteria';
+        }
+
+        if (!$products->getSize()) {
+            throw new \Exception($errorMessage);
+        }
 
         /** @var \Mage_Catalog_Model_Product $firstResult */
         $firstResult = $products->getFirstItem();
@@ -174,7 +196,8 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $this->setupShippingAddress();
         $this->setupShippingMethod();
         $this->setupPaymentMethod();
-        $this->getQuote()->collectTotals();
+        $this->getQuote()->collectTotals()
+            ->save();
 
         $service = \Mage::getModel('sales/service_quote', $quote);
         $order = $service->submitOrder();
@@ -195,11 +218,8 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         /** @var \Mage_Sales_Model_Quote $quote */
         $quote = \Mage::getModel('sales/quote')->assignCustomer($this->getCustomer());
-        $storeId = 1;
-        $store = $quote->getStore()->load($storeId);
+        $store = $quote->getStore()->load($this->_getStoreId());
         $quote->setStore($store);
-        $quote->setBaseCurrencyCode('USD');
-        $quote->setQuoteCurrencyCode('USD');
 
         $this->_quote = $quote;
         return $this->_quote;
@@ -283,10 +303,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
     protected function setupShippingMethod()
     {
-        /** @var Mage_Sales_Model_Quote_Address $shippingAddress */
-        $shippingAddress = $this->getQuote()->getShippingAddress();
+        $shipping_method_code = $this->_getShippingMethodCode();
 
-        $shippingAddress->setShippingMethod('flatrate_flatrate')
+        $this->getQuote()->getShippingAddress()->setShippingMethod($shipping_method_code)
             ->setCollectShippingRates(true)
             ->collectShippingRates();
 
@@ -301,5 +320,35 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         return $this;
 
+    }
+
+    protected function _getDefaultStoreId()
+    {
+        if (empty($this->_defaultStoreId)) {
+            $this->_defaultStoreId = \Mage::app()
+                ->getWebsite(true)
+                ->getDefaultGroup()
+                ->getDefaultStoreId();
+        }
+
+        return $this->_defaultStoreId;
+    }
+
+    protected function _getStoreId()
+    {
+        return $this->_input->getOption('store') ? $this->_input->getOption('store') : $this->_getDefaultStoreId();
+    }
+
+    protected function _getShippingMethodCode()
+    {
+        $shipping_method_code = $this->_input->getOption('shipping');
+
+        if ($shipping_method_code && !in_array($shipping_method_code, $this->_availableSippingMethods)) {
+            throw new \Exception('Shipping method is not supported.');
+        } elseif (!$shipping_method_code) {
+            return $this->_availableSippingMethods[0];
+        } else {
+            return $shipping_method_code;
+        }
     }
 }
