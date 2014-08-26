@@ -153,7 +153,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         return $this->_product;
     }
 
-    protected function _loadRandomProduct($productInput)
+    protected function _loadRandomProduct($skuWildcard)
     {
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $products */
         $products = \Mage::getModel('catalog/product')->getCollection();
@@ -161,9 +161,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $products->setPageSize(1);
         $products->getSelect()->order(new \Zend_Db_Expr('RAND()'));
 
-        if ($productInput) {
-            $products->getSelect()->where('sku LIKE ?', $productInput);
-            $errorMessage = sprintf('No products match the SKU filter: %s', $productInput);
+        if ($skuWildcard) {
+            $products->getSelect()->where('sku LIKE ?', $skuWildcard);
+            $errorMessage = sprintf('No products match the SKU filter: %s', $skuWildcard);
         } else {
             $errorMessage = 'No products are matching the criteria';
         }
