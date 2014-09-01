@@ -74,7 +74,6 @@ class Item extends \KJ\Magento\Util\AbstractUtil
 
         $context = $this->_comparison->getLinesOfContext();
         $lines = $this->_executeShellCommand(sprintf('LANG=en_US diff -U%s -w %s %s', $context, $fromFileFullPath, $toFileFullPath));
-var_dump($lines);
 
         foreach ($lines as & $line) {
             $comparisonItemLine = new \KJ\Magento\Util\Comparison\Item\Line($line);
