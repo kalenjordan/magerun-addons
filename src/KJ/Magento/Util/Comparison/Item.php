@@ -44,7 +44,6 @@ class Item extends \KJ\Magento\Util\AbstractUtil
 
         $fileName = substr($this->_rawLine, $fileNamePosition);
         $fileName = substr($fileName, 0, strpos($fileName, ' and '));
-
         return $fileName;
     }
 
@@ -74,7 +73,7 @@ class Item extends \KJ\Magento\Util\AbstractUtil
         $toFileFullPath = $this->_comparison->getMagentoInstanceRootDirectory() . '/' . $this->getFileName();
 
         $context = $this->_comparison->getLinesOfContext();
-        $lines = $this->_executeShellCommand(sprintf('diff -U%s -w %s %s', $context, $fromFileFullPath, $toFileFullPath));
+        $lines = $this->_executeShellCommand(sprintf('LANG=en_US diff -U%s -w %s %s', $context, $fromFileFullPath, $toFileFullPath));
 
         foreach ($lines as & $line) {
             $comparisonItemLine = new \KJ\Magento\Util\Comparison\Item\Line($line);

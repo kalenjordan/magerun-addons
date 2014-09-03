@@ -37,8 +37,7 @@ class FileComparison extends AbstractComparison
 
     protected function _collectChangedFiles($fromDirectory, $toDirectory, $itemClassName)
     {
-        $this->_diffOutput = $this->_executeShellCommand(sprintf('diff -w -x "var" -qrbB %s %s', $fromDirectory, $toDirectory));
-
+        $this->_diffOutput = $this->_executeShellCommand(sprintf('LANG=en_US diff -w -x "var" -qrbB %s %s', $fromDirectory, $toDirectory));
         foreach ($this->_diffOutput as $line) {
             $comparisonItem = new $itemClassName($line);
             $comparisonItem->setComparison($this);
