@@ -101,12 +101,11 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         }
 
         if ($this->_input->getOption('customer')) {
-            $customer = \Mage::getModel('customer/customer')->load($this->_input->getOption('customer'));
+            $this->_customer = \Mage::getModel('customer/customer')->load($this->_input->getOption('customer'));
         } else {
-            $customer = $this->_loadRandomCustomer();
+            $this->_customer = $this->_loadRandomCustomer();
         }
 
-        $this->_customer = \Mage::getModel('customer/customer')->load($customer->getId());
         return $this->_customer;
     }
 
@@ -147,21 +146,18 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             $product = $this->_loadRandomProduct($productInput);
         }
 
-        /** @var \Mage_Catalog_Model_Product_Type_Configurable $productType */
-        $productType = \Mage::getModel('catalog/product_type_configurable');
-        $parents = $productType->getParentIdsByChild($product->getId());
-        if (!empty($parents)) {
-            throw new \Exception("Product ({$product->getId()}) is a child of configurable, can't use this.");
-        }
-
         $this->_product = $product;
         return $this->_product;
     }
 
     protected function _loadRandomProduct($skuPattern = null)
     {
+
+        // Choose only from simple products so that no configuration has to be made
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $products */
-        $products = \Mage::getModel('catalog/product')->getCollection();
+        $products = \Mage::getModel('catalog/product')->getCollection()
+                          ->addAttributeToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
+
 
         $products->setPageSize(1);
         $products->getSelect()->order(new \Zend_Db_Expr('RAND()'));
