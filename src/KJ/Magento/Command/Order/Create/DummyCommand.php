@@ -169,6 +169,10 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             $products->getSelect()->where('sku LIKE ?', $skuPattern);
         }
 
+        // Only find random products that are saleable and in stock
+        \Mage::getModel('catalog/product_status')->addSaleableFilterToCollection($products);
+        \Mage::getModel('cataloginventory/stock')->addInStockFilterToCollection($products);
+
         if (!$products->getSize()) {
             $errorMessage = 'No products are matching the criteria';
             if ($skuPattern) {
