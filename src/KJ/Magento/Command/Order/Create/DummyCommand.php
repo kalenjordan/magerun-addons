@@ -16,8 +16,13 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     /** @var OutputInterface $input */
     protected $_output;
 
+    /** @var  \Mage_Customer_Model_Customer $_customer */
     protected $_customer;
+
+    /** @var  \Mage_Catalog_Model_Product $_product */
     protected $_product;
+
+    /** @var  \Mage_Sales_Model_Quote $_quote */
     protected $_quote;
 
     /* Lazy loading */
