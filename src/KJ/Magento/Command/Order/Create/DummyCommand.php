@@ -106,11 +106,13 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         }
 
         if ($this->_input->getOption('customer')) {
-            $this->_customer = \Mage::getModel('customer/customer')->load($this->_input->getOption('customer'));
+            $customer = \Mage::getModel('customer/customer')->load($this->_input->getOption('customer'));
         } else {
-            $this->_customer = $this->_loadRandomCustomer();
+            $customer = $this->_loadRandomCustomer();
         }
 
+        // Load customer to make sure we have the full customer information
+        $this->_customer = \Mage::getModel('customer/customer')->load($customer->getId());
         return $this->_customer;
     }
 
