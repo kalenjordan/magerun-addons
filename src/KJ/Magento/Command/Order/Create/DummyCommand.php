@@ -24,7 +24,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected $_defaultStoreId;
 
     /* Supported shipping methods */
-    protected $_availableSippingMethods = array('flatrate_flatrate', 'tablerate_bestway');
+    protected $_availableSippingMethods = array('flatrate_flatrate', 'tablerate_bestway','expresscouriermethod_expresscouriermethod','couriermethod_couriermethod');
 
     protected function configure()
     {
@@ -145,13 +145,6 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             $product = \Mage::getModel('catalog/product')->load($product->getId());
         } else {
             $product = $this->_loadRandomProduct($productInput);
-        }
-
-        /** @var \Mage_Catalog_Model_Product_Type_Configurable $productType */
-        $productType = \Mage::getModel('catalog/product_type_configurable');
-        $parents = $productType->getParentIdsByChild($product->getId());
-        if (!empty($parents)) {
-            throw new \Exception("Product ({$product->getId()}) is a child of configurable, can't use this.");
         }
 
         $this->_product = $product;
