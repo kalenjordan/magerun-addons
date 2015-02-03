@@ -7,6 +7,7 @@ commands:
        - KJ\Magento\Command\Developer\Module\RemoveCommand
        - KJ\Magento\Command\GiftCard\GenerateCodesCommand
        - KJ\Magento\Command\Order\AssignCommand
+       - KJ\Magento\Command\Order\PushCommand
        - KJ\Magento\Command\Order\Create\DummyCommand
        - KJ\Magento\Command\Customer\AnonymizeCommand
        - KJ\Magento\Command\Diff\FileCommand
