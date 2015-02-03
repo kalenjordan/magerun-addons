@@ -204,6 +204,17 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $order->setCreatedAt($this->getCreatedAt());
         $order->save();
 
+        /* create invoice */
+
+        $order = $service->getOrder();
+        $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice();
+        $invoice->register();
+        $transaction = \Mage::getModel('core/resource_transaction')
+            ->addObject($invoice)
+            ->addObject($invoice->getOrder());
+
+        $transaction->save();
+
         return $order;
     }
 
