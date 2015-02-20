@@ -9,7 +9,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ThemeCommand extends AbstractCommand
 {
-    protected $_version = null;
 
     protected function configure()
     {
@@ -30,7 +29,7 @@ class ThemeCommand extends AbstractCommand
         $this->_output = $output;
 
         $this->initMagento();
-        $this->_info(sprintf('Magento Version is %s', $version));
+        $this->_info(sprintf('Magento Version is %s', $this->getCurrentVersion()));
         $this->_info(sprintf('Comparing current theme %s to %s', $this->_getCurrentTheme(), $this->_getThemeToCompareAgainst()));
 
         $comparison = new \KJ\Magento\Util\ThemeComparison($input, $output);
