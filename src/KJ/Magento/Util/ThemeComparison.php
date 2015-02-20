@@ -114,6 +114,9 @@ class ThemeComparison extends AbstractComparison
         $filenames = array();
 
         foreach ($this->_changedLayoutFiles as $comparisonItem) {
+            if (!$this->_filter->filterItem($comparisonItem)) {
+                continue;
+            }
             $filenames[] = array(
                 'file'        => $comparisonItem->getFileName(),
                 'differences' => $comparisonItem->getNumberOfDifferences()
@@ -121,6 +124,9 @@ class ThemeComparison extends AbstractComparison
         }
 
         foreach ($this->_changedTemplateFiles as $comparisonItem) {
+            if (!$this->_filter->filterItem($comparisonItem)) {
+                continue;
+            }
             $filenames[] = array(
                 'file'        => $comparisonItem->getFileName(),
                 'differences' => $comparisonItem->getNumberOfDifferences()

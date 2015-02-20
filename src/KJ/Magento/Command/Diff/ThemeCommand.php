@@ -20,6 +20,7 @@ class ThemeCommand extends AbstractCommand
             ->addArgument('pattern', InputArgument::OPTIONAL, 'List details for any file with a diff that matches on this pattern')
             ->addOption('lines', null, InputOption::VALUE_OPTIONAL, 'The number of lines of context in the diff', 3)
             ->addOption('ignore-copyright', null, InputOption::VALUE_NONE, 'If set, lines containing "@license" and "@copyright" are ignored')
+            ->addOption('filter', null, InputOption::VALUE_OPTIONAL, "Possible values:\n\tonly-different: only files with >0 found differences will be shown in summary\n\tonly-equal: only files with 0 found differences will be shown in summary")
             ->addOption('pro', null, InputOption::VALUE_OPTIONAL, 'If this parameter is passed, it will check pro instead of ee')
             ->setDescription('Diff the theme to detect changes.');
     }
@@ -41,6 +42,7 @@ class ThemeCommand extends AbstractCommand
         if ($this->_input->getOption('ignore-copyright')) {
             $comparison->setAdditionalParameters("-I '@license .*' -I '@copyright *Copyright .* Inc'");
         }
+        $comparison->setFilter($this->_input->getOption('filter'));
 
         $comparison->setMagentoInstanceRootDirectory($this->_magentoRootFolder)
             ->setCurrentTheme($this->_getCurrentTheme())
