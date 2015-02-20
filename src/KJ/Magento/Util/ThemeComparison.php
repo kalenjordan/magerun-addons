@@ -2,14 +2,22 @@
 
 namespace KJ\Magento\Util;
 
+use KJ\Magento\Util\ThemeComparison\LayoutItem;
+use KJ\Magento\Util\ThemeComparison\TemplateItem;
+
 class ThemeComparison extends AbstractComparison
 {
     protected $_currentTheme;
 
     protected $_themeToCompareAgainst;
 
+    /**
+     * @var LayoutItem[]
+     */
     protected $_changedLayoutFiles = array();
-
+    /**
+     * @var TemplateItem[]
+     */
     protected $_changedTemplateFiles = array();
 
     protected $_magentoInstanceRootDirectory;
@@ -107,13 +115,15 @@ class ThemeComparison extends AbstractComparison
 
         foreach ($this->_changedLayoutFiles as $comparisonItem) {
             $filenames[] = array(
-                'file' => $comparisonItem->getFileName()
+                'file'        => $comparisonItem->getFileName(),
+                'differences' => $comparisonItem->getNumberOfDifferences()
             );
         }
 
         foreach ($this->_changedTemplateFiles as $comparisonItem) {
             $filenames[] = array(
-                'file' => $comparisonItem->getFileName()
+                'file'        => $comparisonItem->getFileName(),
+                'differences' => $comparisonItem->getNumberOfDifferences()
             );
         }
 

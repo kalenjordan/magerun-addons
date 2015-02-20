@@ -14,6 +14,8 @@ class AbstractThemeComparisonItem extends \KJ\Magento\Util\AbstractUtil
     /** @var  \KJ\Magento\Util\ThemeComparison */
     protected $_comparison;
 
+    protected $_diffResult;
+
     /**
      * @param $file \Symfony\Component\Finder\SplFileInfo
      */
@@ -87,6 +89,9 @@ class AbstractThemeComparisonItem extends \KJ\Magento\Util\AbstractUtil
 
     public function getDiff()
     {
+        if ($this->_diffResult !== null) {
+            return $this->_diffResult;
+        }
         $fromFileFullPath = $this->_getAbsoluteFilePathToCompareAgainst();
         $toFileFullPath = $this->_getAbsoluteFilePath();
 
@@ -106,8 +111,15 @@ class AbstractThemeComparisonItem extends \KJ\Magento\Util\AbstractUtil
                 $this->_numberOfDifferences++;
             }
         }
+        $this->_diffResult = $lines;
 
         return $lines;
+    }
+
+    public function getNumberOfDifferences()
+    {
+        $this->getDiff();
+        return $this->_numberOfDifferences;
     }
 
     public function fileToCompareAgainstExists()

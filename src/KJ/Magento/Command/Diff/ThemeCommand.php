@@ -66,7 +66,7 @@ class ThemeCommand extends AbstractCommand
     protected function _outputComparisonSummary($comparison)
     {
         $this->getHelper('table')
-            ->setHeaders(array('File'))
+            ->setHeaders(array('File', 'Differences'))
             ->setRows($comparison->getSummary())
             ->render($this->_output);
     }
