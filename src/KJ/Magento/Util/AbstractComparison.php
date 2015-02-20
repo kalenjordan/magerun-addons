@@ -14,6 +14,8 @@ class AbstractComparison extends AbstractUtil
 
     protected $_linesOfContext;
 
+    protected $_additionalParameters = '';
+
     public function __construct($input, $output)
     {
         $this->_input = $input;
@@ -56,5 +58,15 @@ class AbstractComparison extends AbstractUtil
         }
 
         return 3;
+    }
+
+    public function setAdditionalParameters($paramString)
+    {
+        $this->_additionalParameters = $paramString;
+    }
+
+    public function getAdditionalParameters()
+    {
+        return $this->_additionalParameters;
     }
 }
