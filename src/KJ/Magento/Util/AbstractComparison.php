@@ -2,6 +2,8 @@
 
 namespace KJ\Magento\Util;
 
+use KJ\Magento\Util\Comparison\Filter;
+
 class AbstractComparison extends AbstractUtil
 {
     /** @var InputInterface $input */
@@ -10,9 +12,16 @@ class AbstractComparison extends AbstractUtil
     /** @var OutputInterface $output  */
     protected $_output;
 
+    /**
+     * @var Filter
+     */
+    protected $_filter;
+
     protected $_magentoInstanceRootDirectory;
 
     protected $_linesOfContext;
+
+    protected $_additionalParameters = '';
 
     public function __construct($input, $output)
     {
@@ -56,5 +65,25 @@ class AbstractComparison extends AbstractUtil
         }
 
         return 3;
+    }
+
+    public function setAdditionalParameters($paramString)
+    {
+        $this->_additionalParameters = $paramString;
+    }
+
+    public function getAdditionalParameters()
+    {
+        return $this->_additionalParameters;
+    }
+
+    public function setFilter($filter)
+    {
+        $this->_filter = Filter::factory($filter);
+    }
+
+    public function getFilter($filter)
+    {
+        return $this->_filter;
     }
 }

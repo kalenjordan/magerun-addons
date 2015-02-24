@@ -21,7 +21,7 @@ class Line extends \KJ\Magento\Util\AbstractUtil
             return false;
         }
 
-        if ($this->_isFileNameLine($line)) {
+        if ($this->_isFileNameLine($this->_rawLine)) {
             return false;
         }
 

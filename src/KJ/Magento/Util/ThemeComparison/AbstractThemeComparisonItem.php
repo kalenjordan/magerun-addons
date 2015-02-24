@@ -14,6 +14,8 @@ class AbstractThemeComparisonItem extends \KJ\Magento\Util\AbstractUtil
     /** @var  \KJ\Magento\Util\ThemeComparison */
     protected $_comparison;
 
+    protected $_diffResult;
+
     /**
      * @param $file \Symfony\Component\Finder\SplFileInfo
      */
@@ -87,11 +89,16 @@ class AbstractThemeComparisonItem extends \KJ\Magento\Util\AbstractUtil
 
     public function getDiff()
     {
+        if ($this->_diffResult !== null) {
+            return $this->_diffResult;
+        }
         $fromFileFullPath = $this->_getAbsoluteFilePathToCompareAgainst();
         $toFileFullPath = $this->_getAbsoluteFilePath();
 
         $context = $this->_comparison->getLinesOfContext();
-        $lines = $this->_executeShellCommand(sprintf('diff -U%s -w %s %s', $context, $fromFileFullPath, $toFileFullPath));
+        $additionalParameters = $this->_comparison->getAdditionalParameters();
+        $lines = $this->_executeShellCommand(sprintf('diff -U%s %s -w %s %s',
+            $context, $additionalParameters, $fromFileFullPath, $toFileFullPath));
 
         foreach ($lines as & $line) {
             $comparisonItemLine = new \KJ\Magento\Util\Comparison\Item\Line($line);
@@ -106,8 +113,15 @@ class AbstractThemeComparisonItem extends \KJ\Magento\Util\AbstractUtil
                 $this->_numberOfDifferences++;
             }
         }
+        $this->_diffResult = $lines;
 
         return $lines;
+    }
+
+    public function getNumberOfDifferences()
+    {
+        $this->getDiff();
+        return $this->_numberOfDifferences;
     }
 
     public function fileToCompareAgainstExists()

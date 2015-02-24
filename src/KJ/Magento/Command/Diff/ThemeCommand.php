@@ -9,7 +9,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ThemeCommand extends AbstractCommand
 {
-    protected $_version = null;
 
     protected function configure()
     {
@@ -19,7 +18,10 @@ class ThemeCommand extends AbstractCommand
             ->addArgument('current-theme', InputArgument::REQUIRED, 'Current theme', null)
             ->addArgument('theme-to-compare-against', InputArgument::REQUIRED, 'Which theme to diff against', null)
             ->addArgument('pattern', InputArgument::OPTIONAL, 'List details for any file with a diff that matches on this pattern')
+            ->addOption('raw', null, InputOption::VALUE_NONE, 'If set, the summary outputs only file names, without table decoration')
             ->addOption('lines', null, InputOption::VALUE_OPTIONAL, 'The number of lines of context in the diff', 3)
+            ->addOption('ignore-copyright', null, InputOption::VALUE_NONE, 'If set, lines containing "@license" and "@copyright" are ignored')
+            ->addOption('filter', null, InputOption::VALUE_OPTIONAL, "Possible values:\n\tonly-different: only files with >0 found differences will be shown in summary\n\tonly-equal: only files with 0 found differences will be shown in summary")
             ->addOption('pro', null, InputOption::VALUE_OPTIONAL, 'If this parameter is passed, it will check pro instead of ee')
             ->setDescription('Diff the theme to detect changes.');
     }
@@ -30,14 +32,20 @@ class ThemeCommand extends AbstractCommand
         $this->_output = $output;
 
         $this->initMagento();
-        $this->_info(sprintf('Magento Version is %s', $version));
-        $this->_info(sprintf('Comparing current theme %s to %s', $this->_getCurrentTheme(), $this->_getThemeToCompareAgainst()));
+        if (!$this->_input->getOption('raw')) {
+            $this->_info(sprintf('Magento Version is %s', $this->getCurrentVersion()));
+            $this->_info(sprintf('Comparing current theme %s to %s', $this->_getCurrentTheme(), $this->_getThemeToCompareAgainst()));
+        }
 
         $comparison = new \KJ\Magento\Util\ThemeComparison($input, $output);
 
         if ($this->_input->getOption('lines')) {
             $comparison->setLinesOfContext($this->_input->getOption('lines'));
         }
+        if ($this->_input->getOption('ignore-copyright')) {
+            $comparison->setAdditionalParameters("-I '@license .*' -I '@copyright *Copyright .* Inc'");
+        }
+        $comparison->setFilter($this->_input->getOption('filter'));
 
         $comparison->setMagentoInstanceRootDirectory($this->_magentoRootFolder)
             ->setCurrentTheme($this->_getCurrentTheme())
@@ -66,10 +74,16 @@ class ThemeCommand extends AbstractCommand
      */
     protected function _outputComparisonSummary($comparison)
     {
-        $this->getHelper('table')
-            ->setHeaders(array('File'))
-            ->setRows($comparison->getSummary())
-            ->render($this->_output);
+        if ($this->_input->getOption('raw')) {
+            foreach ($comparison->getSummary() as $item) {
+                $this->_output->writeln($item['file']);
+            }
+        } else {
+            $this->getHelper('table')
+                ->setHeaders(array('File', 'Differences'))
+                ->setRows($comparison->getSummary())
+                ->render($this->_output);
+        }
     }
 
     /**
