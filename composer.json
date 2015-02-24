@@ -4,6 +4,7 @@
     "description": "Addon commands for N98 MageRun",
     "keywords": ["magerun"],
     "homepage": "https://github.com/kalenjordan/magerun-addons",
+    "minimum-stability": "dev",
     "license": "MIT",
     "authors": [
         {
@@ -15,6 +16,9 @@
     ],
     "require": {
         "php": ">=5.3.0"
+    },
+    "require-dev": {
+        "n98/magerun": "1.91.*"
     },
     "autoload": {
         "psr-0": {

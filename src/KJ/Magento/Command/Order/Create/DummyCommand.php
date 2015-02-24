@@ -16,8 +16,13 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     /** @var OutputInterface $input */
     protected $_output;
 
+    /** @var  \Mage_Customer_Model_Customer $_customer */
     protected $_customer;
+
+    /** @var  \Mage_Catalog_Model_Product $_product */
     protected $_product;
+
+    /** @var  \Mage_Sales_Model_Quote $_quote */
     protected $_quote;
 
     /* Lazy loading */
@@ -106,6 +111,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             $customer = $this->_loadRandomCustomer();
         }
 
+        // Load customer to make sure we have the full customer information
         $this->_customer = \Mage::getModel('customer/customer')->load($customer->getId());
         return $this->_customer;
     }
@@ -147,27 +153,28 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             $product = $this->_loadRandomProduct($productInput);
         }
 
-        /** @var \Mage_Catalog_Model_Product_Type_Configurable $productType */
-        $productType = \Mage::getModel('catalog/product_type_configurable');
-        $parents = $productType->getParentIdsByChild($product->getId());
-        if (!empty($parents)) {
-            throw new \Exception("Product ({$product->getId()}) is a child of configurable, can't use this.");
-        }
-
         $this->_product = $product;
         return $this->_product;
     }
 
     protected function _loadRandomProduct($skuPattern = null)
     {
+
+        // Choose only from simple products so that no configuration has to be made
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $products */
-        $products = \Mage::getModel('catalog/product')->getCollection();
+        $products = \Mage::getModel('catalog/product')->getCollection()
+                          ->addAttributeToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
+
 
         $products->setPageSize(1);
         $products->getSelect()->order(new \Zend_Db_Expr('RAND()'));
         if ($skuPattern) {
             $products->getSelect()->where('sku LIKE ?', $skuPattern);
         }
+
+        // Only find random products that are saleable and in stock
+        \Mage::getModel('catalog/product_status')->addSaleableFilterToCollection($products);
+        \Mage::getModel('cataloginventory/stock')->addInStockFilterToCollection($products);
 
         if (!$products->getSize()) {
             $errorMessage = 'No products are matching the criteria';
