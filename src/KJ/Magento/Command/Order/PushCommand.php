@@ -109,7 +109,7 @@ class PushCommand extends \N98\Magento\Command\AbstractMagentoCommand
             if ($order->getId()) {
                 $this->_output->writeln("<info>Loaded order by increment ID: {$this->_getOrderId()}");
             } else {
-                throw new Exception("Wasn't able to load order by entity ID or increment ID: " . $this->_getOrderId());
+                throw new \Exception("Wasn't able to load order by entity ID or increment ID: " . $this->_getOrderId());
             }
         }
 
