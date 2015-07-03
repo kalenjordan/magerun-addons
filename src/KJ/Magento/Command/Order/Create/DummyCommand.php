@@ -345,13 +345,11 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function setupPaymentMethod()
     {
         $quotePayment = $this->getQuote()->getPayment();
-		$paymentInput = $this->_input->getOption('payment');
 
-		if ($paymentInput) {
-			$ccTokenInput = $this->_input->getOption('cc_token');
+		if ($paymentInput = $this->_input->getOption('payment')) {
 			$quotePayment->setMethod($paymentInput);
-			if ($ccTokenInput) {
-				\Mage::app()->getRequest()->setPost('payment', array(
+			if ($ccTokenInput = $this->_input->getOption('cc_token')) {
+				\Mage::app()->getRequest()->setPost('payment', array(  //works for Braintree
 					'method' => $paymentInput,
 					'cc_token' => $ccTokenInput
 				));
