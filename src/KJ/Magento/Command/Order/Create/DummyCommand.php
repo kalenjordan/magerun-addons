@@ -40,6 +40,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             ->addOption('product', null, InputOption::VALUE_OPTIONAL, "A product SKU to use for the order")
             ->addOption('store', null, InputOption::VALUE_OPTIONAL, "A store ID to use for the order")
             ->addOption('shipping', null, InputOption::VALUE_OPTIONAL, "A shipping method code to use for the order")
+            ->addOption('custom_options', null, InputOption::VALUE_OPTIONAL, "Custom options to use for the product, if applicable")
+            ->addOption('payment', null, InputOption::VALUE_OPTIONAL, "A payment method code to use for the order.  Defaults to 'checkmo'")
+            ->addOption('cc_token', null, InputOption::VALUE_OPTIONAL, "Token to use for payment method, if applicable")
             ->setDescription('(Experimental) Create a dummy order using a random customer, product, and date.')
         ;
     }
@@ -245,8 +248,20 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $product = $this->getProduct();
         $quote = $this->getQuote();
 
+        $request = null;
+        if (!$product->getOptionsReadonly()) {
+            $customOptions = $this->_getCustomOptions();
+            $param = array(
+                'product' => $product->getId(),
+                'qty' => 1,
+                'options' => $customOptions
+            );
+            $request = new \Varien_Object();
+            $request->setData($param);
+        }
+
         /** @var \Mage_Sales_Model_Quote_Item $quoteItem */
-        $quoteItem = $quote->addProduct($product);
+        $quoteItem = $quote->addProduct($product, $request);
         if (is_string($quoteItem)) {
             throw new \Exception(sprintf("Error: $quoteItem"));
         }
@@ -330,7 +345,19 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function setupPaymentMethod()
     {
         $quotePayment = $this->getQuote()->getPayment();
-        $quotePayment->setMethod('checkmo');
+
+        if ($paymentInput = $this->_input->getOption('payment')) {
+            $quotePayment->setMethod($paymentInput);
+            if ($ccTokenInput = $this->_input->getOption('cc_token')) {
+                \Mage::app()->getRequest()->setPost('payment', array(  //works for Braintree
+                    'method' => $paymentInput,
+                    'cc_token' => $ccTokenInput
+                ));
+            }
+        } else {
+            $quotePayment->setMethod('checkmo');
+        }
+
         $this->getQuote()->setPayment($quotePayment);
 
         return $this;
@@ -366,5 +393,17 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         }
 
         return $shippingMethodCode;
+    }
+
+    protected function _getCustomOptions()
+    {
+        $customOptions = $this->_input->getOption('custom_options');
+        $customOptions = explode(',', $customOptions);
+        $customOptions = array_combine(range(1, count($customOptions)), $customOptions);
+        if (!is_array($customOptions)) {
+            throw new \Exception(sprintf("Error: Error parsing custom options"));
+        }
+
+        return $customOptions;
     }
 }
