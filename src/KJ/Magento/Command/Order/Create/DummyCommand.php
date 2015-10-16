@@ -29,7 +29,13 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected $_defaultStoreId;
 
     /* Supported shipping methods */
-    protected $_availableSippingMethods = array('flatrate_flatrate', 'tablerate_bestway', 'Ground');
+    protected $_availableSippingMethods = array(
+        'productmatrix_Ground',
+        'productmatrix_Next_Day_Air',
+        'productmatrix_2nd_Day_Air',
+        'flatrate_flatrate',
+        'tablerate_bestway'
+    );
 
     protected function configure()
     {
@@ -64,7 +70,9 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             try {
                 $this->_createOrder();
             } catch (\Exception $e) {
+                //$this->_output->writeln("<error>Exception type: " . get_class($e) . "</error>");
                 $this->_output->writeln("<error>Problem creating order: " . $e->getMessage() . "</error>");
+                //$this->_output->writeln("<error>Trace: " . $e->getTraceAsString() . "</error>");
             }
             $this->_resetEverything();
         }
@@ -334,6 +342,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function setupShippingMethod()
     {
         $shippingMethodCode = $this->_getShippingMethodCode();
+        $this->_output->writeln("<error>Selected shipping method: {$shippingMethodCode}</error>");
 
         $this->getQuote()->getShippingAddress()->setShippingMethod($shippingMethodCode)
             ->setCollectShippingRates(true)
