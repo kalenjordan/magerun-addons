@@ -29,7 +29,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected $_defaultStoreId;
 
     /* Supported shipping methods */
-    protected $_availableSippingMethods = array('flatrate_flatrate', 'tablerate_bestway');
+    protected $_availableSippingMethods = array('flatrate_flatrate', 'tablerate_bestway', 'Ground');
 
     protected function configure()
     {
