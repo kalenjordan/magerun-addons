@@ -342,7 +342,6 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected function setupShippingMethod()
     {
         $shippingMethodCode = $this->_getShippingMethodCode();
-        $this->_output->writeln("<error>Selected shipping method: {$shippingMethodCode}</error>");
 
         $this->getQuote()->getShippingAddress()->setShippingMethod($shippingMethodCode)
             ->setCollectShippingRates(true)
