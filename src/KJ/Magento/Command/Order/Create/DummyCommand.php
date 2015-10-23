@@ -43,6 +43,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             ->addOption('custom_options', null, InputOption::VALUE_OPTIONAL, "Custom options to use for the product, if applicable")
             ->addOption('payment', null, InputOption::VALUE_OPTIONAL, "A payment method code to use for the order.  Defaults to 'checkmo'")
             ->addOption('cc_token', null, InputOption::VALUE_OPTIONAL, "Token to use for payment method, if applicable")
+            ->addOption('email', null, InputOption::VALUE_OPTIONAL, "Send order email to customer (0/1)")
             ->setDescription('(Experimental) Create a dummy order using a random customer, product, and date.')
         ;
     }
@@ -96,6 +97,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $order = $this->createOrderFromQuote();
         if ($order) {
             $this->_output->writeln(sprintf("<info>Created order: %s</info>", $order->getIncrementId()));
+            $this->sendOrderEmail($order);
         }
     }
 
@@ -405,5 +407,14 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         }
 
         return $customOptions;
+    }
+    protected function sendOrderEmail($order)
+    {
+        $sendOrderEmailOption = $this->_input->getOption('email');
+        if ($sendOrderEmailOption == 1) {
+            $order->getSendConfirmation(null);
+            $order->sendNewOrderEmail();
+            $this->_output->writeln(sprintf("<info>Order email has been sent to: %s</info>", $order->getCustomerEmail()));
+        }
     }
 }
