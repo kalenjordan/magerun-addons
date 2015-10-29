@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use KJ\Magento\Util\Comparison\Item;
 
 class FileCommand extends AbstractCommand
 {
@@ -85,8 +86,34 @@ class FileCommand extends AbstractCommand
         /** @var $comparisonItem \KJ\Magento\Util\Comparison\Item */
         foreach ($comparison->getChangedFiles() as $comparisonItem) {
             if ($comparisonItem->isTextFile()) {
-                $comparisonItem->getDiff();
-                $this->_info($comparisonItem->getFileName() . ":" . $comparisonItem->getLineNumber());
+                $this->_outputComparisonForFileWithLineNumber($comparisonItem);
+            }
+        }
+    }
+
+    /**
+     * @param $comparisonItem \KJ\Magento\Util\Comparison\Item
+     * @throws \Exception
+     */
+    protected function _outputComparisonForFileWithLineNumber($comparisonItem)
+    {
+        // Will get filled in with a number
+        $lineNumber = "XX";
+
+        $lines = $comparisonItem->getDiff();
+
+        foreach ($lines as $line) {
+            if (Item\Line::getLineNumber($line)) {
+                $lineNumber = Item\Line::getLineNumber($line);
+            }
+
+            if (Item\Line::isChange($line)) {
+                if (! isset($haveStartedAChangeBlock)) {
+                    $this->_info($comparisonItem->getFileName() . ":" . $lineNumber);
+                }
+                $haveStartedAChangeBlock = true;
+            } else {
+                unset($haveStartedAChangeBlock);
             }
         }
     }

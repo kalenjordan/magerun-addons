@@ -6,7 +6,6 @@ class Item extends \KJ\Magento\Util\AbstractUtil
 {
     protected $_rawLine;
     protected $_numberOfDifferences = 0;
-    protected $_lineNumber;
 
     /** @var  \KJ\Magento\Util\FileComparison */
     protected $_comparison;
@@ -48,11 +47,6 @@ class Item extends \KJ\Magento\Util\AbstractUtil
         return $fileName;
     }
 
-    public function getLineNumber()
-    {
-        return $this->_lineNumber;
-    }
-
     public function setComparison($comparison)
     {
         $this->_comparison = $comparison;
@@ -80,7 +74,6 @@ class Item extends \KJ\Magento\Util\AbstractUtil
 
         $context = $this->_comparison->getLinesOfContext();
         $lines = $this->_executeShellCommand(sprintf('LANG=en_US diff -U%s -w %s %s', $context, $fromFileFullPath, $toFileFullPath));
-        $this->_lineNumber = $this->_parseLineNumber($lines);
 
         foreach ($lines as & $line) {
             $comparisonItemLine = new \KJ\Magento\Util\Comparison\Item\Line($line);
@@ -112,36 +105,5 @@ class Item extends \KJ\Magento\Util\AbstractUtil
         }
 
         return false;
-    }
-
-    /**
-     * Example line:
-     *
-     *     @@ -207,3 +207,5 @@
-     * @param $lines
-     * @throws \Exception
-     */
-    protected function _parseLineNumber($lines)
-    {
-        if (! isset($lines[2])) {
-            throw new \Exception("Couldn't find line 2 in diff");
-        }
-
-        $lineWithLineNumber = $lines[2];
-        if (substr($lineWithLineNumber, 0, 2) != '@@') {
-            throw new \Exception("Line 2 doesn't start with '@@' as expected");
-        }
-
-        $lineWithLineNumber = substr($lineWithLineNumber, 2);
-
-        $parts = explode(",", $lineWithLineNumber);
-        if (! isset($parts[0])) {
-            throw new \Exception("Problem splitting the line number line on a comma");
-        }
-
-        $lineNumber = trim($parts[0]);
-        $lineNumber = -1 * $lineNumber;
-
-        return $lineNumber;
     }
 }
