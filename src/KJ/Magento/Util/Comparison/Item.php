@@ -7,7 +7,7 @@ class Item extends \KJ\Magento\Util\AbstractUtil
     protected $_rawLine;
     protected $_numberOfDifferences = 0;
 
-    /** @var  \KJ\Magento\Util\Comparison */
+    /** @var  \KJ\Magento\Util\FileComparison */
     protected $_comparison;
 
     public function __construct($rawLine)
@@ -90,5 +90,20 @@ class Item extends \KJ\Magento\Util\AbstractUtil
         }
 
         return $lines;
+    }
+
+    public function isTextFile()
+    {
+        // ess is for .htaccess
+        $textFileExtensions = array('php', 'ess');
+
+        $fileName = $this->getFileName();
+        $fileExtension = substr($fileName, -3);
+
+        if (in_array($fileExtension, $textFileExtensions)) {
+            return true;
+        }
+
+        return false;
     }
 }
