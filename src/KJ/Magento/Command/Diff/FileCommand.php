@@ -109,7 +109,7 @@ class FileCommand extends AbstractCommand
 
             if (Item\Line::isChange($line)) {
                 if (! isset($haveStartedAChangeBlock)) {
-                    $this->_info($comparisonItem->getFileName() . ":" . $lineNumber);
+                    $this->_output->writeln($comparisonItem->getFileName() . ":" . $lineNumber);
                 }
                 $haveStartedAChangeBlock = true;
             } else {
