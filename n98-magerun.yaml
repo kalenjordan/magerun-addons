@@ -11,5 +11,4 @@ commands:
        - KJ\Magento\Command\Customer\AnonymizeCommand
        - KJ\Magento\Command\Diff\FileCommand
        - KJ\Magento\Command\Diff\ThemeCommand
-       - KJ\Magento\Command\Core\UnhackCommand
        - KJ\Magento\Command\Mailchimp\UnsubscribeListCommand
