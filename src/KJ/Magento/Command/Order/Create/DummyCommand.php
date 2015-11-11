@@ -164,12 +164,10 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
     protected function _loadRandomProduct($skuPattern = null)
     {
-
         // Choose only from simple products so that no configuration has to be made
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $products */
         $products = \Mage::getModel('catalog/product')->getCollection()
-                          ->addAttributeToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
-
+            ->addAttributeToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
 
         $products->setPageSize(1);
         $products->getSelect()->order(new \Zend_Db_Expr('RAND()'));
@@ -178,8 +176,13 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         }
 
         // Only find random products that are saleable and in stock
-        \Mage::getModel('catalog/product_status')->addSaleableFilterToCollection($products);
-        \Mage::getModel('cataloginventory/stock')->addInStockFilterToCollection($products);
+        /** @var \Mage_Catalog_Model_Product_Status $productStatus */
+        $productStatus = \Mage::getModel('catalog/product_status');
+        $productStatus->addSaleableFilterToCollection($products);
+
+        /** @var \Mage_CatalogInventory_Model_Stock $stock */
+        $stock = \Mage::getModel('cataloginventory/stock');
+        $stock->addInStockFilterToCollection($products);
 
         if (!$products->getSize()) {
             $errorMessage = 'No products are matching the criteria';
@@ -251,7 +254,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $quote = $this->getQuote();
 
         $request = null;
-        if (!$product->getOptionsReadonly()) {
+        if (!$product->getData('options_readonly')) {
             $customOptions = $this->_getCustomOptions();
             $param = array(
                 'product' => $product->getId(),
@@ -408,11 +411,14 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         return $customOptions;
     }
+
+    /**
+     * @param $order \Mage_Sales_Model_Order
+     */
     protected function sendOrderEmail($order)
     {
         $sendOrderEmailOption = $this->_input->getOption('email');
         if ($sendOrderEmailOption == 1) {
-            $order->getSendConfirmation(null);
             $order->sendNewOrderEmail();
             $this->_output->writeln(sprintf("<info>Order email has been sent to: %s</info>", $order->getCustomerEmail()));
         }
