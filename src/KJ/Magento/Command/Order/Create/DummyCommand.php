@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Faker;
 
 class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 {
@@ -37,6 +38,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             ->setName('order:create:dummy')
             ->addArgument('count', InputArgument::REQUIRED, 'Count')
             ->addOption('customer', null, InputOption::VALUE_OPTIONAL, "A customer ID to use for the order")
+            ->addOption('new-customer', null, InputOption::VALUE_OPTIONAL, "Create a new customer for this order")
             ->addOption('product', null, InputOption::VALUE_OPTIONAL, "A product SKU to use for the order")
             ->addOption('store', null, InputOption::VALUE_OPTIONAL, "A store ID to use for the order")
             ->addOption('shipping', null, InputOption::VALUE_OPTIONAL, "A shipping method code to use for the order")
@@ -110,6 +112,18 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             return $this->_customer;
         }
 
+        if ($this->_input->getOption('new-customer')) {
+            $faker = Faker\Factory::create();
+            $customer = \Mage::getModel('customer/customer');
+            $customer->setData('firstname', $faker->firstName)
+                ->setData('lastname', $faker->lastName)
+                ->setData('email', $faker->safeEmail);
+
+            $customer->save();
+            $this->_customer = $customer;
+            return $this->_customer;
+        }
+        
         if ($this->_input->getOption('customer')) {
             $customer = \Mage::getModel('customer/customer')->load($this->_input->getOption('customer'));
         } else {
