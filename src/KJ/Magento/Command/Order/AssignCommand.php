@@ -83,7 +83,7 @@ class AssignCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
     protected function _saveOrder()
     {
-        if ($this->_input->getOption('dry-run')) {
+        if ($this->_input->getArgument('dry-run')) {
             $this->_output->writeln("<info>\r\nJust a dry run, order not saved</info>");
         } else {
             $this->_output->writeln("<info>\r\nSAVING order</info>");
