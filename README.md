@@ -77,7 +77,7 @@ Assigns the order #10000000001 to customer ID 10.
 
 ### Anonymize customer data ###
 
-Anonymize customer data across a bunch of tables: order, order address, newsletter, quotes,
+Anonymize customer email addresses across a bunch of tables: order, order address, newsletter, quotes,
 newsletter subscriber.
 
     $ mr customer:anon
