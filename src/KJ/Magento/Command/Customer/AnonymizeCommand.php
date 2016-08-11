@@ -52,7 +52,7 @@ class AnonymizeCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
         $tableName = $resource->getTableName($table);
         $query = "update $tableName set $emailColumn = " .
-                 "concat('test+',SUBSTRING(MD5(CONCAT($emailColumn,'$salt')) FROM 1 FOR 10),'@example.com') " .
+                 "concat('test+',SUBSTRING(SHA1(CONCAT($emailColumn,'$salt')) FROM 1 FOR 10),'@example.com') " .
                  "where $emailColumn not like 'test+%;'";
 
         $connection->query($query);
