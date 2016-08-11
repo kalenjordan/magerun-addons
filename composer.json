@@ -1,6 +1,6 @@
 {
     "name": "kalenjordan/magerun-addons",
-    "type": "library",
+    "type": "magento-module",
     "description": "Addon commands for N98 MageRun",
     "keywords": ["magerun"],
     "homepage": "https://github.com/kalenjordan/magerun-addons",
@@ -15,6 +15,7 @@
         }
     ],
     "require": {
+        "magento-hackathon/magento-composer-installer": "*",
         "php": ">=5.3.0"
     },
     "require-dev": {
