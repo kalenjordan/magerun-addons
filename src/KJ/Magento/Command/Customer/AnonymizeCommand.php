@@ -20,6 +20,7 @@ class AnonymizeCommand extends \N98\Magento\Command\AbstractMagentoCommand
     {
         $this
             ->setName('customer:anon')
+            ->addOption('whitelist', null, InputOption::VALUE_OPTIONAL, "A comma separated list of domains for which email addresses will be left untouched")
             ->setDescription('Strip all email addresses from customer tables.')
         ;
     }
@@ -54,6 +55,14 @@ class AnonymizeCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $query = "update $tableName set $emailColumn = " .
                  "concat('test+',SUBSTRING(SHA1(CONCAT($emailColumn,'$salt')) FROM 1 FOR 10),'@example.com') " .
                  "where $emailColumn not like 'test+%;'";
+
+        if ($this->_input->getOption('whitelist')) {
+            $whitelistDomains = explode(',', $this->_input->getOption('whitelist'));
+            
+            foreach ($whitelistDomains as $domain) {
+                $query .= " AND $emailColumn not like '%@" . $domain . "'";
+            }
+        }
 
         $connection->query($query);
 

@@ -80,7 +80,9 @@ Assigns the order #10000000001 to customer ID 10.
 Anonymize customer email addresses across a bunch of tables: order, order address, newsletter, quotes,
 newsletter subscriber.
 
-    $ mr customer:anon
+Optionally you can pass a comma separated list of domain for which email addresses will be left untouched.
+
+    $ mr customer:anon [--whitelist="example.com,dummy.net,..."]
 
 ### Core file diff ###
 
