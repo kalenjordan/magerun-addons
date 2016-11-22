@@ -30,7 +30,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
     protected $_defaultStoreId;
 
     /* Supported shipping methods */
-    protected $_availableSippingMethods = array('flatrate_flatrate', 'tablerate_bestway');
+    protected $_availableSippingMethods = array('flatrate_flatrate', 'tablerate_bestway','expresscouriermethod_expresscouriermethod','couriermethod_couriermethod');
 
     protected function configure()
     {
@@ -239,6 +239,17 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
         $order = $service->submitOrder();
         $order->setCreatedAt($this->getCreatedAt());
         $order->save();
+
+        /* create invoice */
+
+        $order = $service->getOrder();
+        $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice();
+        $invoice->register();
+        $transaction = \Mage::getModel('core/resource_transaction')
+            ->addObject($invoice)
+            ->addObject($invoice->getOrder());
+
+        $transaction->save();
 
         return $order;
     }
