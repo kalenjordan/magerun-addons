@@ -54,7 +54,11 @@ URL ending in .com or a URL relative to the base (.e.g. {{base_url}}skin).
 This is very experimental and has some defaults in it such as the default billing address for a customer
 that aren't very international-friendly.
 
-    $ mr order:create:dummy [--customer="..."] [--product="..."] [--store="..."] [--shipping="..."] count
+    $ mr order:create:dummy [--customer="..."] [--product="..."] [--store="..."] [--shipping="..."] [--email=".."] count
+
+Example command:
+
+    $ mr order:create:dummy --store="store_id" --shipping="flatrate_flatrate" --email="1" 5
     
 Unless specified it picks a random customer, random product, and a random order creation date up to two years ago from
 the present time, and creates a defined number of orders order for a selected store.
