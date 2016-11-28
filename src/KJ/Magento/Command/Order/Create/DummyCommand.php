@@ -46,6 +46,7 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
             ->addOption('payment', null, InputOption::VALUE_OPTIONAL, "A payment method code to use for the order.  Defaults to 'checkmo'")
             ->addOption('cc_token', null, InputOption::VALUE_OPTIONAL, "Token to use for payment method, if applicable")
             ->addOption('email', null, InputOption::VALUE_OPTIONAL, "Send order email to customer (0/1)")
+            ->addOption('days_ago', null, InputOption::VALUE_OPTIONAL, "Number of days ago to create this order.")
             ->setDescription('(Experimental) Create a dummy order using a random customer, product, and date.')
         ;
     }
@@ -216,7 +217,12 @@ class DummyCommand extends \N98\Magento\Command\AbstractMagentoCommand
 
     protected function getCreatedAt()
     {
-        $daysAgo = rand(1, 365 * 2);
+        $daysAgo = $this->_input->getOption('days_ago', null);
+
+        if (is_null($daysAgo)) {
+            $daysAgo = rand(1, 365 * 2);
+        }
+
         $createdAtTimestamp = time() - $daysAgo * 24 * 60 * 60;
         $createdAtString = date('Y-m-d', $createdAtTimestamp);
 
